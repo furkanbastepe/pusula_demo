@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -82,21 +82,21 @@ export default function OnboardingPage() {
         // Final step - save profile
         setLoading(true);
         try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
-            if (user) {
-                await supabase.from("profiles").update({
-                    full_name: name,
-                    bio: bio,
-                    sdg_interests: selectedSDGs,
-                    skills: selectedSkills,
-                    onboarding_completed: true,
-                }).eq("id", user.id);
+            // Store in local storage for demo purposes
+            const demoProfile = {
+                name,
+                bio,
+                sdg_interests: selectedSDGs,
+                skills: selectedSkills,
+                onboarding_completed: true
+            };
+            localStorage.setItem('pusula_demo_profile', JSON.stringify(demoProfile));
 
-                toast.success("Profilin kaydedildi! 🎉");
-                router.push("/panel");
-            }
+            toast.success("Profilin kaydedildi! 🎉");
+            router.push("/panel");
         } catch (error) {
             console.error("Error saving profile:", error);
             toast.error("Profil kaydedilemedi");
@@ -184,8 +184,8 @@ export default function OnboardingPage() {
                                             onClick={() => toggleSDG(sdg.id)}
                                             disabled={!isSelected && selectedSDGs.length >= 3}
                                             className={`flex items-center gap-2 rounded-xl border p-3 text-left transition-all ${isSelected
-                                                    ? "border-primary bg-primary/10"
-                                                    : "border-border bg-secondary/30 hover:border-muted-foreground"
+                                                ? "border-primary bg-primary/10"
+                                                : "border-border bg-secondary/30 hover:border-muted-foreground"
                                                 } ${!isSelected && selectedSDGs.length >= 3 ? "opacity-50 cursor-not-allowed" : ""}`}
                                         >
                                             <SDGBadge sdg={sdg.id} variant="small" />
@@ -214,8 +214,8 @@ export default function OnboardingPage() {
                                             onClick={() => toggleSkill(skill.id)}
                                             disabled={!isSelected && selectedSkills.length >= 4}
                                             className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${isSelected
-                                                    ? "border-primary bg-primary/10"
-                                                    : "border-border bg-secondary/30 hover:border-muted-foreground"
+                                                ? "border-primary bg-primary/10"
+                                                : "border-border bg-secondary/30 hover:border-muted-foreground"
                                                 } ${!isSelected && selectedSkills.length >= 4 ? "opacity-50 cursor-not-allowed" : ""}`}
                                         >
                                             <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${isSelected ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"

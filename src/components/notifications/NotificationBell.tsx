@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, Check, CheckCircle2, Edit3, XCircle, Flame, Gift, Users } from "lucide-react";
+import { Bell, Check, CheckCircle2, Gift, Flame, Users } from "lucide-react";
 
 interface Notification {
     id: string;
@@ -75,74 +74,16 @@ const typeColors: Record<string, string> = {
 };
 
 export function NotificationBell() {
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [notifications, setNotifications] = useState<Notification[]>(demoNotifications);
     const [open, setOpen] = useState(false);
 
-    const loadNotifications = useCallback(async () => {
-        try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (user) {
-                const { data } = await supabase
-                    .from("notifications")
-                    .select("*")
-                    .eq("user_id", user.id)
-                    .order("created_at", { ascending: false })
-                    .limit(10);
-
-                if (data && data.length > 0) {
-                    setNotifications(data);
-                } else {
-                    setNotifications(demoNotifications);
-                }
-            } else {
-                setNotifications(demoNotifications);
-            }
-        } catch (error) {
-            console.error("Error loading notifications:", error);
-            setNotifications(demoNotifications);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        loadNotifications();
-    }, [loadNotifications]);
-
     const markAsRead = async (id: string) => {
-        try {
-            const supabase = createClient();
-            await supabase
-                .from("notifications")
-                .update({ read: true })
-                .eq("id", id);
-        } catch (error) {
-            console.error("Error marking notification as read:", error);
-        }
-
         setNotifications(prev =>
             prev.map(n => n.id === id ? { ...n, read: true } : n)
         );
     };
 
     const markAllAsRead = async () => {
-        try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                await supabase
-                    .from("notifications")
-                    .update({ read: true })
-                    .eq("user_id", user.id)
-                    .eq("read", false);
-            }
-        } catch (error) {
-            console.error("Error marking all as read:", error);
-        }
-
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     };
 
@@ -194,9 +135,7 @@ export function NotificationBell() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-zinc-800" />
 
-                {loading ? (
-                    <div className="p-4 text-center text-sm text-zinc-500">Yükleniyor...</div>
-                ) : notifications.length === 0 ? (
+                {notifications.length === 0 ? (
                     <div className="p-4 text-center text-sm text-zinc-500">Bildirim yok</div>
                 ) : (
                     <>

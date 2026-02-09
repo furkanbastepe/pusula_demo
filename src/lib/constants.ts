@@ -11,8 +11,8 @@ export const ROUTES = {
     privacy: '/gizlilik',
 
     // Auth
-    login: '/giris',
-    register: '/kayit',
+    login: '/panel', // FOR DEMO: Redirect to panel
+    register: '/panel', // FOR DEMO: Redirect to panel
 
     // Student
     onboarding: '/baslangic',

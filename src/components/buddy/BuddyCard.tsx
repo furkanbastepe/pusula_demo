@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,70 +45,8 @@ const demoBuddy: BuddyInfo = {
 };
 
 export function BuddyCard({ userId, compact = false }: BuddyCardProps) {
-    const [buddy, setBuddy] = useState<BuddyInfo | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function loadBuddy() {
-            try {
-                const supabase = createClient();
-                const { data: { user } } = await supabase.auth.getUser();
-
-                if (user) {
-                    // Get current user's buddy_id
-                    const { data: profile } = await supabase
-                        .from("profiles")
-                        .select("buddy_id")
-                        .eq("id", user.id)
-                        .single();
-
-                    if (profile?.buddy_id) {
-                        // Get buddy's profile
-                        const { data: buddyData } = await supabase
-                            .from("profiles")
-                            .select("id, name, email, level, xp, updated_at")
-                            .eq("id", profile.buddy_id)
-                            .single();
-
-                        if (buddyData) {
-                            const now = new Date();
-                            const lastActive = new Date(buddyData.updated_at);
-                            const diffMins = Math.floor((now.getTime() - lastActive.getTime()) / 60000);
-
-                            // Check if buddy has pending submission to review
-                            const { data: pendingSub } = await supabase
-                                .from("submissions")
-                                .select("id")
-                                .eq("user_id", profile.buddy_id)
-                                .eq("verification_status", "pending")
-                                .eq("buddy_reviewed", false)
-                                .limit(1);
-
-                            setBuddy({
-                                ...buddyData,
-                                lastActive: diffMins < 60 ? `${diffMins} dk önce` :
-                                    diffMins < 1440 ? `${Math.floor(diffMins / 60)} saat önce` :
-                                        `${Math.floor(diffMins / 1440)} gün önce`,
-                                pendingReview: (pendingSub && pendingSub.length > 0) || false,
-                            });
-                        }
-                    }
-                }
-
-                // Fallback to demo if no buddy
-                if (!buddy) {
-                    setBuddy(demoBuddy);
-                }
-            } catch (error) {
-                console.error("Error loading buddy:", error);
-                setBuddy(demoBuddy);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadBuddy();
-    }, [userId]);
+    const [buddy, setBuddy] = useState<BuddyInfo | null>(demoBuddy);
+    const [loading, setLoading] = useState(false);
 
     if (loading) {
         return (
