@@ -3,7 +3,7 @@ import { Lexend, Noto_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DemoProvider } from "@/lib/DemoContext";
-import { DemoController } from "@/components/demo/DemoController";
+// import { DemoController } from "@/components/demo/DemoController";
 
 // Display font for headings
 const lexend = Lexend({
@@ -61,7 +61,7 @@ export default function RootLayout({
       >
         <DemoProvider>
           {children}
-          <DemoController />
+          {/* <DemoController /> */}
           <Toaster position="top-right" />
         </DemoProvider>
       </body>
