@@ -104,7 +104,7 @@ export default function HomePage() {
             <a href="#model" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
               Model
             </a>
-            <a href="#sdg" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+            <a href="#contact" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
               İletişim
             </a>
           </div>
@@ -160,7 +160,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. MISSION SECTION - Parallax Cards */}
-      <section className="relative py-32 bg-[#0a0a0a] overflow-hidden" id="mission">
+      <section className="relative py-32 bg-[#0a0a0a] overflow-hidden scroll-mt-24" id="mission">
         {/* Abstract Background Glows */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -305,7 +305,7 @@ export default function HomePage() {
       </section>
 
       {/* 4. JOURNEY SECTION - Horizontal Scroll Cards with Images */}
-      <section className="py-32 bg-[#111722] relative overflow-hidden" id="model">
+      <section className="py-32 bg-[#111722] relative overflow-hidden scroll-mt-24" id="model">
         <div className="max-w-7xl mx-auto px-6 mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -428,6 +428,70 @@ export default function HomePage() {
             </Link>
           </div>
         </motion.div>
+      </section>
+
+      {/* 7. CONTACT SECTION */}
+      <section id="contact" className="py-24 bg-[#111722] relative border-t border-white/5 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row gap-16">
+             {/* Text Content */}
+            <div className="flex-1">
+              <span className="text-emerald-500 font-medium tracking-widest text-sm uppercase mb-4 block">
+                İletişim
+              </span>
+              <h2 className="font-display font-bold text-4xl text-white mb-6">
+                Bizimle İletişime Geçin
+              </h2>
+              <p className="text-slate-400 text-lg mb-8 leading-relaxed">
+                Eskişehir DİGEM'deki atölyelerimiz, eğitimlerimiz ve işbirlikleri hakkında detaylı bilgi almak için bize ulaşın.
+              </p>
+              
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold mb-1">Adres</h3>
+                    <p className="text-slate-400">
+                      Uluönder, Rauf Orbay Cd. No:9<br/>
+                      26200 Tepebaşı/Eskişehir
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold mb-1">E-posta</h3>
+                    <p className="text-slate-400">
+                      info@digem.org.tr
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold mb-1">Telefon</h3>
+                    <p className="text-slate-400">
+                      +90 (222) 211 55 00
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Map Placeholder */}
+            <div className="flex-1 h-[400px] bg-[#0a0a0a] rounded-2xl border border-white/10 overflow-hidden relative group">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3066.077271810486!2d30.50554877651046!3d39.78280367154867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cc15e610660a5d%3A0x69c4558cd6a0c0e7!2sAnadolu%20University!5e0!3m2!1sen!2str!4v1707475000000!5m2!1sen!2str" width="100%" height="100%" style={{border:0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="opacity-60 group-hover:opacity-100 transition-opacity duration-500"></iframe>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* FOOTER */}

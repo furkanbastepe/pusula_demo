@@ -52,20 +52,20 @@ export function DemoController() {
                             </div>
 
                             {/* User State Preview */}
-                            <div className="rounded-lg bg-secondary/50 p-2 text-xs">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Kullanıcı:</span>
-                                    <span className="font-medium">{currentUser.name}</span>
+                            <div className="rounded-lg bg-secondary/50 p-3 text-xs space-y-2">
+                                <div>
+                                    <span className="text-muted-foreground block mb-0.5">Kullanıcı:</span>
+                                    <span className="font-medium text-foreground">{currentUser.name}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Seviye:</span>
+                                <div>
+                                    <span className="text-muted-foreground block mb-0.5">Seviye:</span>
                                     <span className="font-medium capitalize text-primary">
                                         {currentUser.level}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">XP:</span>
-                                    <span className="font-medium">{currentUser.xp}</span>
+                                <div>
+                                    <span className="text-muted-foreground block mb-0.5">XP:</span>
+                                    <span className="font-medium text-foreground">{currentUser.xp}</span>
                                 </div>
                             </div>
 
@@ -125,7 +125,7 @@ export function DemoController() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-black shadow-lg hover:bg-primary/90 transition-transform hover:scale-105 active:scale-95"
             >
-                <MaterialIcon name={isOpen ? "close" : "smart_toy"} />
+                <MaterialIcon name={isOpen ? "close" : "layers"} />
             </button>
         </div>
     );
