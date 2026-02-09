@@ -210,7 +210,7 @@ export default function KohortPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
                                             <h3 className="font-medium text-foreground truncate">{student.name}</h3>
-                                            <LevelBadge level={student.level as "cirak" | "kalfa" | "usta" | "mezun"} variant="small" />
+                                            <LevelBadge level={student.level as "cirak" | "kalfa" | "usta" | "graduate"} variant="small" />
                                             {student.pendingReviews > 0 && (
                                                 <Badge className="bg-chart-4/20 text-chart-4 border-0 text-xs">
                                                     {student.pendingReviews} bekliyor

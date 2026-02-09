@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-interface FeedItem {
+export interface FeedItem {
     id: string;
     type: "achievement" | "problem" | "workshop" | "milestone" | "announcement";
     title: string;

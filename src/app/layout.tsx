@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Lexend, Noto_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { DemoProvider } from "@/lib/DemoContext";
+import { DemoController } from "@/components/demo/DemoController";
 
 // Display font for headings
 const lexend = Lexend({
@@ -57,8 +59,11 @@ export default function RootLayout({
       <body
         className={`${lexend.variable} ${notoSans.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        {children}
-        <Toaster position="top-right" />
+        <DemoProvider>
+          {children}
+          <DemoController />
+          <Toaster position="top-right" />
+        </DemoProvider>
       </body>
     </html>
   );

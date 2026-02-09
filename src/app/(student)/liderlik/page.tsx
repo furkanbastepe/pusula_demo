@@ -294,7 +294,7 @@ export default function LiderlikPage() {
                                                         <p className={`font-medium ${user.isCurrentUser ? "text-primary" : "text-foreground"}`}>
                                                             {user.name} {user.isCurrentUser && "(Sen)"}
                                                         </p>
-                                                        <LevelBadge level={user.level as "cirak" | "kalfa" | "usta" | "mezun"} variant="small" />
+                                                        <LevelBadge level={user.level as "cirak" | "kalfa" | "usta" | "graduate"} variant="small" />
                                                     </div>
                                                 </div>
 

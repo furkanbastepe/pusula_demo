@@ -2,6 +2,7 @@
 
 export type UserRole = 'student' | 'guide'
 export type Level = 'cirak' | 'kalfa' | 'usta' | 'graduate'
+
 export type Difficulty = 'easy' | 'med' | 'hard'
 export type VerificationStatus = 'pending' | 'verified' | 'needs_changes' | 'rejected'
 export type ReviewDecision = 'approved' | 'needs_changes' | 'rejected'

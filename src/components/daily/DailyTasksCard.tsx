@@ -7,7 +7,7 @@ import { BookOpen, Hammer, Users, Check, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-interface DailyTask {
+export interface DailyTask {
     id: string;
     task_type: "learning" | "project" | "community";
     title: string;

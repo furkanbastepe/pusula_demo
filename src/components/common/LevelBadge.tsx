@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
-
-type Level = "cirak" | "kalfa" | "usta" | "mezun";
+import { Level } from "@/types/database";
 
 const LEVEL_CONFIG: Record<Level, { label: string; color: string; bgColor: string; icon: string }> = {
     cirak: {
@@ -21,7 +20,7 @@ const LEVEL_CONFIG: Record<Level, { label: string; color: string; bgColor: strin
         bgColor: "rgba(139, 92, 246, 0.2)",
         icon: "workspace_premium",
     },
-    mezun: {
+    graduate: {
         label: "Mezun",
         color: "#f59e0b",
         bgColor: "rgba(245, 158, 11, 0.2)",

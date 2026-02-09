@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -129,8 +129,8 @@ export default function TaskDetailPage() {
                                 <div
                                     key={step.id}
                                     className={`flex items-center gap-3 rounded-lg border p-3 ${step.completed
-                                            ? "border-primary/30 bg-primary/10"
-                                            : "border-border bg-secondary/30"
+                                        ? "border-primary/30 bg-primary/10"
+                                        : "border-border bg-secondary/30"
                                         }`}
                                 >
                                     <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step.completed ? "bg-primary text-black" : "bg-secondary text-muted-foreground"

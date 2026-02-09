@@ -12,6 +12,8 @@ import { MaterialIcon } from "@/components/common/MaterialIcon";
 import { LevelBadge } from "@/components/common/LevelBadge";
 import { SDGBadge } from "@/components/common/SDGBadge";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { useDemo } from "@/lib/DemoContext";
+import { DEMO_STAGES } from "@/lib/demo-data";
 
 // Mock user data
 const user = {
@@ -73,8 +75,23 @@ const certificates = [
 ];
 
 export default function ProfilPage() {
+    const { currentUser, currentStage } = useDemo();
+    const { dashboardData } = DEMO_STAGES[currentStage];
     const [activeTab, setActiveTab] = useState("genel");
-    const xpPercent = (user.xp / user.xpToNext) * 100;
+
+    // Merge dynamic user data with static profile data for Merve
+    const profileUser = {
+        ...user,
+        name: currentUser.name,
+        level: currentUser.level,
+        xp: currentUser.xp,
+        xpToNext: currentUser.xpToNext,
+        streak: currentUser.streak,
+        // Use GDR score from current user
+        gdrScore: currentUser.gdrScore,
+    };
+
+    const xpPercent = (profileUser.xp / profileUser.xpToNext) * 100;
 
     return (
         <div className="min-h-screen bg-gradient-hero p-4 md:p-6">
@@ -90,40 +107,40 @@ export default function ProfilPage() {
                         {/* Avatar & Basic Info */}
                         <div className="flex items-start gap-4">
                             <Avatar className="h-20 w-20 border-4 border-primary/30">
-                                <AvatarImage src={user.avatar || undefined} />
+                                <AvatarImage src={profileUser.avatar || undefined} />
                                 <AvatarFallback className="bg-primary/20 text-2xl font-bold text-primary">
-                                    {user.name[0]}{user.surname[0]}
+                                    {profileUser.name[0]}{profileUser.surname[0]}
                                 </AvatarFallback>
                             </Avatar>
                             <div>
                                 <h1 className="font-display text-2xl font-bold text-foreground">
-                                    {user.name} {user.surname}
+                                    {profileUser.name} {profileUser.surname}
                                 </h1>
                                 <div className="mt-1 flex flex-wrap items-center gap-2">
-                                    <LevelBadge level={user.level} variant="medium" />
-                                    <SDGBadge sdg={user.sdg} variant="small" />
-                                    <span className="text-sm text-muted-foreground">{user.cohort}</span>
+                                    <LevelBadge level={profileUser.level} variant="medium" />
+                                    <SDGBadge sdg={profileUser.sdg} variant="small" />
+                                    <span className="text-sm text-muted-foreground">{profileUser.cohort}</span>
                                 </div>
-                                <p className="mt-2 max-w-md text-sm text-muted-foreground">{user.bio}</p>
+                                <p className="mt-2 max-w-md text-sm text-muted-foreground">{profileUser.bio}</p>
                             </div>
                         </div>
 
                         {/* Quick Stats */}
                         <div className="flex flex-wrap gap-4">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-primary">{user.xp}</div>
+                                <div className="text-2xl font-bold text-primary">{profileUser.xp}</div>
                                 <div className="text-xs text-muted-foreground">XP</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-chart-4">{user.streak}</div>
+                                <div className="text-2xl font-bold text-chart-4">{profileUser.streak}</div>
                                 <div className="text-xs text-muted-foreground">Streak</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-chart-2">{user.gdrScore}</div>
+                                <div className="text-2xl font-bold text-chart-2">{profileUser.gdrScore}</div>
                                 <div className="text-xs text-muted-foreground">GDR</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-chart-3">{user.badges.length}</div>
+                                <div className="text-2xl font-bold text-chart-3">{profileUser.badges.length}</div>
                                 <div className="text-xs text-muted-foreground">Rozet</div>
                             </div>
                         </div>
@@ -135,7 +152,7 @@ export default function ProfilPage() {
                             <span className="text-muted-foreground">
                                 Sonraki seviye: <span className="font-semibold text-foreground">Usta</span>
                             </span>
-                            <span className="font-semibold text-foreground">{user.xp} / {user.xpToNext} XP</span>
+                            <span className="font-semibold text-foreground">{profileUser.xp} / {profileUser.xpToNext} XP</span>
                         </div>
                         <Progress value={xpPercent} className="h-2 bg-secondary" />
                     </div>
@@ -282,8 +299,8 @@ export default function ProfilPage() {
                                         <MaterialIcon name="image" size="xl" className="text-muted-foreground" />
                                     </div>
                                     <Badge className={`mb-2 ${project.status === "active"
-                                            ? "bg-blue-500/20 text-blue-400"
-                                            : "bg-primary/20 text-primary"
+                                        ? "bg-blue-500/20 text-blue-400"
+                                        : "bg-primary/20 text-primary"
                                         } border-0`}>
                                         {project.status === "active" ? "Devam Ediyor" : "Tamamlandı"}
                                     </Badge>

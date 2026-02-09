@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { useDemo } from "@/lib/DemoContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +60,7 @@ const gateConfigs: Record<string, GateData> = {
     },
     usta: {
         level: "usta",
-        nextLevel: "mezun",
+        nextLevel: "graduate",
         requirements: [
             { id: "xp", label: "4000 XP topla", type: "xp", target: 4000, current: 2100, fulfilled: false, icon: "star" },
             { id: "tasks", label: "40 görevi tamamla", type: "task", target: 40, current: 28, fulfilled: false, icon: "task_alt" },
@@ -84,101 +84,70 @@ export default function GatePage() {
     const router = useRouter();
     const level = params.level as string;
 
+    const { currentUser, setStage, nextStage } = useDemo();
     const [gate, setGate] = useState<GateData | null>(null);
     const [loading, setLoading] = useState(true);
     const [advancing, setAdvancing] = useState(false);
 
     useEffect(() => {
-        async function loadGateData() {
-            try {
-                const supabase = createClient();
-                const { data: { user } } = await supabase.auth.getUser();
+        // Simulate data loading
+        const timer = setTimeout(() => {
+            const levelConfig = gateConfigs[level] || gateConfigs.cirak;
 
-                if (user) {
-                    const { data: profile } = await supabase
-                        .from("profiles")
-                        .select("*")
-                        .eq("id", user.id)
-                        .single();
+            // Mock requirements based on demo user data
+            const requirements = levelConfig.requirements.map((req) => {
+                let current = req.current;
 
-                    if (profile) {
-                        const { data: submissions } = await supabase
-                            .from("submissions")
-                            .select("id")
-                            .eq("user_id", user.id)
-                            .eq("verification_status", "verified");
+                // Use real demo user data where possible
+                if (req.type === "xp") current = currentUser.xp;
+                // For other types, we'll just use the mock values or satisfied values if user level is higher
+                const isHigherLevel =
+                    (currentUser.level === "kalfa" && level === "cirak") ||
+                    (currentUser.level === "usta" && (level === "cirak" || level === "kalfa")) ||
+                    (currentUser.level === "graduate" && level !== "graduate");
 
-                        const { data: attempts } = await supabase
-                            .from("microlab_attempts")
-                            .select("id")
-                            .eq("user_id", user.id)
-                            .eq("status", "done");
-
-                        const tasksCompleted = submissions?.length || 0;
-                        const microlabsCompleted = attempts?.length || 0;
-
-                        const levelConfig = gateConfigs[level] || gateConfigs.cirak;
-                        const requirements = levelConfig.requirements.map((req) => {
-                            let current = req.current;
-                            if (req.type === "xp") current = profile.xp;
-                            if (req.type === "task") current = tasksCompleted;
-                            if (req.type === "microlab") current = microlabsCompleted;
-
-                            return { ...req, current, fulfilled: current >= req.target };
-                        });
-
-                        const allFulfilled = requirements.every((r) => r.fulfilled);
-                        setGate({
-                            ...levelConfig,
-                            requirements,
-                            allFulfilled,
-                            canAdvance: allFulfilled && profile.level === level,
-                        });
-                    } else {
-                        setGate(gateConfigs[level] || gateConfigs.cirak);
-                    }
-                } else {
-                    setGate(gateConfigs[level] || gateConfigs.cirak);
+                if (isHigherLevel) {
+                    current = req.target;
                 }
-            } catch (error) {
-                console.error("Error loading gate data:", error);
-                setGate(gateConfigs[level] || gateConfigs.cirak);
-            } finally {
-                setLoading(false);
-            }
-        }
 
-        loadGateData();
-    }, [level]);
+                return { ...req, current, fulfilled: current >= req.target };
+            });
+
+            const allFulfilled = requirements.every((r) => r.fulfilled);
+
+            setGate({
+                ...levelConfig,
+                requirements,
+                allFulfilled,
+                canAdvance: allFulfilled && currentUser.level === level,
+            });
+            setLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [level, currentUser]);
 
     const handleAdvance = async () => {
         if (!gate?.canAdvance) return;
         setAdvancing(true);
 
-        try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-            if (user) {
-                await supabase.from("profiles").update({ level: gate.nextLevel }).eq("id", user.id);
+        // Advance stage in demo
+        nextStage();
 
-                // Confetti celebration!
-                confetti({
-                    particleCount: 200,
-                    spread: 100,
-                    origin: { y: 0.6 },
-                    colors: ["#13ec5b", "#22c55e", "#3b82f6", "#facc15"],
-                });
+        // Confetti celebration!
+        confetti({
+            particleCount: 200,
+            spread: 100,
+            origin: { y: 0.6 },
+            colors: ["#13ec5b", "#22c55e", "#3b82f6", "#facc15"],
+        });
 
-                toast.success(`Tebrikler! ${LEVEL_LABELS[gate.nextLevel as keyof typeof LEVEL_LABELS]} seviyesine yükseldin! 🎉`);
-                setTimeout(() => router.push("/panel"), 2500);
-            }
-        } catch (error) {
-            console.error("Error advancing level:", error);
-            toast.error("Seviye yükseltme başarısız");
-        } finally {
-            setAdvancing(false);
-        }
+        toast.success(`Tebrikler! ${LEVEL_LABELS[gate.nextLevel as keyof typeof LEVEL_LABELS]} seviyesine yükseldin! 🎉`);
+        setTimeout(() => router.push("/panel"), 2500);
+        setAdvancing(false);
     };
 
     if (loading) {
@@ -242,8 +211,8 @@ export default function GatePage() {
                         {/* Gate icon container */}
                         <div
                             className={`relative mx-auto flex h-32 w-32 items-center justify-center rounded-full border-4 ${gate.allFulfilled
-                                    ? "border-primary bg-primary/20 glow-green"
-                                    : "border-border bg-secondary"
+                                ? "border-primary bg-primary/20 glow-green"
+                                : "border-border bg-secondary"
                                 }`}
                         >
                             <MaterialIcon
@@ -261,9 +230,9 @@ export default function GatePage() {
 
                     {/* Level Transition */}
                     <div className="flex items-center justify-center gap-4">
-                        <LevelBadge level={level as "cirak" | "kalfa" | "usta" | "mezun"} variant="medium" />
+                        <LevelBadge level={level as "cirak" | "kalfa" | "usta" | "graduate"} variant="medium" />
                         <MaterialIcon name="arrow_forward" className="text-muted-foreground" />
-                        <LevelBadge level={gate.nextLevel as "cirak" | "kalfa" | "usta" | "mezun"} variant="medium" />
+                        <LevelBadge level={gate.nextLevel as "cirak" | "kalfa" | "usta" | "graduate"} variant="medium" />
                     </div>
                 </div>
 
@@ -296,8 +265,8 @@ export default function GatePage() {
                             <div
                                 key={req.id}
                                 className={`flex items-center justify-between rounded-xl border p-4 transition-all ${req.fulfilled
-                                        ? "border-primary/30 bg-primary/10"
-                                        : "border-border bg-secondary/30"
+                                    ? "border-primary/30 bg-primary/10"
+                                    : "border-border bg-secondary/30"
                                     }`}
                             >
                                 <div className="flex items-center gap-3">

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MaterialIcon } from "@/components/common/MaterialIcon";
 import { LevelBadge } from "@/components/common/LevelBadge";
+import { useDemo } from "@/lib/DemoContext";
 
 interface NavItem {
     label: string;
@@ -16,7 +17,7 @@ interface NavItem {
     badge?: number;
 }
 
-const MAIN_NAV: NavItem[] = [
+const MAIN_NAV_TEMPLATE: NavItem[] = [
     { label: "Panel", href: "/panel", icon: "dashboard" },
     { label: "Müfredat", href: "/ogren", icon: "menu_book" },
     { label: "Görevler", href: "/gorevler", icon: "checklist" },
@@ -25,17 +26,10 @@ const MAIN_NAV: NavItem[] = [
     { label: "Sıralama", href: "/liderlik", icon: "trophy" },
     { label: "Buddy", href: "/buddy", icon: "people" },
     { label: "Pazar", href: "/pazar", icon: "shopping_bag" },
-    { label: "Bildirimler", href: "/bildirimler", icon: "notifications", badge: 3 },
+    { label: "Bildirimler", href: "/bildirimler", icon: "notifications" },
     { label: "Profil", href: "/profil", icon: "person" },
     { label: "Ayarlar", href: "/ayarlar", icon: "settings" },
 ];
-
-// Mock user
-const MOCK_USER = {
-    name: "Zeynep",
-    level: "kalfa" as const,
-    xp: 1250,
-};
 
 interface SidebarMobileSheetProps {
     type?: "student" | "guide";
@@ -44,11 +38,19 @@ interface SidebarMobileSheetProps {
 export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps) {
     const [open, setOpen] = useState(false);
     const pathname = usePathname();
+    const { currentUser } = useDemo();
 
     const isActive = (href: string) => {
         if (href === "/panel") return pathname === "/panel";
         return pathname.startsWith(href);
     };
+
+    const mainNav = MAIN_NAV_TEMPLATE.map(item => {
+        if (item.label === "Bildirimler" && currentUser.notifications > 0) {
+            return { ...item, badge: currentUser.notifications };
+        }
+        return item;
+    });
 
     return (
         <>
@@ -76,7 +78,7 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
                         {/* Navigation */}
                         <nav className="flex-1 overflow-y-auto px-3 py-4">
                             <div className="space-y-1">
-                                {MAIN_NAV.map((item) => (
+                                {mainNav.map((item) => (
                                     <Link
                                         key={item.href}
                                         href={item.href}
@@ -92,7 +94,7 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
                                             <MaterialIcon name={item.icon} size="md" />
                                             <span>{item.label}</span>
                                         </div>
-                                        {item.badge && (
+                                        {item.badge && item.badge > 0 && (
                                             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-black">
                                                 {item.badge}
                                             </span>
@@ -109,8 +111,8 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
                                     <MaterialIcon name="person" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-foreground">{MOCK_USER.name}</p>
-                                    <LevelBadge level={MOCK_USER.level} variant="small" showIcon={false} />
+                                    <p className="text-sm font-semibold text-foreground">{currentUser.name}</p>
+                                    <LevelBadge level={currentUser.level} variant="small" showIcon={false} />
                                 </div>
                             </div>
                         </div>
@@ -129,14 +131,16 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
                         <MaterialIcon name="star" size="sm" className="text-primary" />
-                        <span className="text-xs font-semibold text-foreground">{MOCK_USER.xp}</span>
+                        <span className="text-xs font-semibold text-foreground">{currentUser.xp}</span>
                     </div>
                     <Link href="/bildirimler">
                         <Button variant="ghost" size="icon" className="relative text-muted-foreground">
                             <MaterialIcon name="notifications" />
-                            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
-                                3
-                            </span>
+                            {currentUser.notifications > 0 && (
+                                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+                                    {currentUser.notifications}
+                                </span>
+                            )}
                         </Button>
                     </Link>
                 </div>
@@ -147,5 +151,3 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
         </>
     );
 }
-
-export default SidebarMobileSheet;
