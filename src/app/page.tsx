@@ -108,9 +108,9 @@ export default function HomePage() {
               İletişim
             </a>
           </div>
-          <Link href="/kayit">
+          <Link href="/panel">
             <Button className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-              Kayıt Ol
+              Demoyu Başlat
               <ArrowRight className="size-4" />
             </Button>
           </Link>
@@ -407,12 +407,12 @@ export default function HomePage() {
             Geleceğini şansa bırakma. PUSULA ile kariyerine profesyonel bir başlangıç yap.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/kayit">
+            <Link href="/panel">
               <Button
                 size="lg"
                 className="px-8 py-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
               >
-                Hemen Başvur
+                Hemen Başla (Demo)
                 <ArrowRight className="ml-2 size-5" />
               </Button>
             </Link>
@@ -497,7 +497,7 @@ export default function HomePage() {
 
       {/* FLOATING ACTION BUTTON */}
       <div className="fixed bottom-8 right-8 z-40 group">
-        <Link href="/kayit">
+        <Link href="/panel">
           <button className="size-14 rounded-full bg-emerald-600 hover:bg-amber-500 text-white flex items-center justify-center shadow-2xl transition-all duration-300 transform hover:scale-110 hover:rotate-90">
             <ArrowRight className="size-6" />
           </button>
