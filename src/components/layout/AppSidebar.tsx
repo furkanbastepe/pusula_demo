@@ -29,6 +29,7 @@ const SECONDARY_NAV_TEMPLATE: NavItem[] = [
     { label: "AI Mentor", href: "/mentor", icon: "smart_toy" },
     { label: "Buddy", href: "/buddy", icon: "people" },
     { label: "Pazar", href: "/pazar", icon: "shopping_bag" },
+    { label: "Etkileşimli Öğrenme", href: "/etkilesim/degiskenler", icon: "code" },
     { label: "Bildirimler", href: "/bildirimler", icon: "notifications" },
 ];
 
@@ -43,7 +44,8 @@ interface AppSidebarProps {
 
 export function AppSidebar({ className }: AppSidebarProps) {
     const pathname = usePathname();
-    const { currentUser } = useDemo();
+    const { state } = useDemo();
+    const currentUser = state;
 
     const isActive = (href: string) => {
         if (href === "/panel") return pathname === "/panel";
@@ -51,8 +53,8 @@ export function AppSidebar({ className }: AppSidebarProps) {
     };
 
     const secondaryNav = SECONDARY_NAV_TEMPLATE.map(item => {
-        if (item.label === "Bildirimler" && currentUser.notifications > 0) {
-            return { ...item, badge: currentUser.notifications };
+        if (item.label === "Bildirimler" && (currentUser?.notifications?.length || 0) > 0) {
+            return { ...item, badge: currentUser.notifications.length };
         }
         return item;
     });

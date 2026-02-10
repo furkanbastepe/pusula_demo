@@ -52,19 +52,39 @@ export default function EtkinliklerPage() {
                 transition={{ duration: 0.5, delay: 0.1 }}
             >
                 <Breadcrumb />
-                <div className="mt-4">
-                    <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl flex items-center gap-3">
+                <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl flex items-center gap-3">
+                            <motion.div
+                                animate={{ rotate: [0, 15, -15, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                            >
+                                <MaterialIcon name="celebration" className="text-primary" />
+                            </motion.div>
+                            Etkinlikler
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
+                            Yarışmalara katıl, becerilerini göster ve ödüller kazan!
+                        </p>
+                    </div>
+                    <Link href="/kapi">
                         <motion.div
-                            animate={{ rotate: [0, 15, -15, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
-                            <MaterialIcon name="celebration" className="text-primary" />
+                            <Card className="bg-gradient-to-r from-indigo-900 to-blue-900 border-indigo-500/30 cursor-pointer hover:shadow-lg hover:shadow-indigo-500/20 transition-all">
+                                <CardContent className="p-3 flex items-center gap-3">
+                                    <div className="bg-white/10 p-2 rounded-lg">
+                                        <MaterialIcon name="qr_code_2" className="text-white" />
+                                    </div>
+                                    <div className="hidden md:block">
+                                        <div className="text-xs text-indigo-200 font-medium">Fiziksel Giriş</div>
+                                        <div className="text-sm font-bold text-white">QR Kartım</div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </motion.div>
-                        Etkinlikler
-                    </h1>
-                    <p className="mt-1 text-muted-foreground">
-                        Yarışmalara katıl, becerilerini göster ve ödüller kazan!
-                    </p>
+                    </Link>
                 </div>
             </motion.header>
 

@@ -28,42 +28,42 @@ import {
 // Journey stages with image URLs
 const journey = [
   {
-    level: "Çırak",
-    english: "Apprentice",
-    duration: "6 hafta",
+    level: "Keşif",
+    english: "Discovery",
+    duration: "1-4. Hafta",
     tasks: 10,
     icon: Construction,
     image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop",
-    description: "Temel yetkinliklerin kazanıldığı, disiplin ve çalışma kültürünün aşılandığı ilk adım. Burada öğrenmeyi öğreniyorsunuz.",
-    features: ["Temel Kodlama", "Algoritmik Düşünce"],
+    description: "Dijital okuryazarlık, temel Python ve algoritma mantığı. Zeynep burada ilk kodunu yazdı.",
+    features: ["Dijital Ayak İzi", "Algoritma Mantığı", "Python'a Giriş"],
     tag: "BAŞLANGIÇ",
     tagColor: "bg-blue-500",
     accentColor: "text-blue-500",
     borderColor: "hover:border-blue-500/50",
   },
   {
-    level: "Kalfa",
-    english: "Journeyman",
-    duration: "6 hafta",
+    level: "İnşa",
+    english: "Build",
+    duration: "5-8. Hafta",
     tasks: 15,
     icon: Wrench,
     image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop",
-    description: "Teorik bilginin pratiğe döküldüğü, gerçek dünya projelerinde rol alınan geliştirme safhası. Hata yapmaktan korkma.",
-    features: ["Proje Yönetimi", "Takım Çalışması"],
+    description: "Veri analizi, Pandas ve proje yönetimi. Teorik bilgilerin Porsuk Çayı projesine dönüştüğü evre.",
+    features: ["Veri Temizliği", "Veri Görselleştirme", "Proje Yönetimi"],
     tag: "ORTA SEVİYE",
     tagColor: "bg-cyan-500",
     accentColor: "text-cyan-400",
     borderColor: "hover:border-cyan-400/50",
   },
   {
-    level: "Usta",
-    english: "Master",
-    duration: "4 hafta",
+    level: "Etki",
+    english: "Impact",
+    duration: "9-12. Hafta",
     tasks: 15,
     icon: Crown,
     image: "https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?w=800&h=600&fit=crop",
-    description: "Liderlik, inovasyon ve mentorluk. Artık sadece üretmiyor, yön veriyor ve öğretiyorsunuz. Sektöre yön verme zamanı.",
-    features: ["İnovasyon Liderliği", "Mentorluk"],
+    description: "Makine öğrenmesi, Capstone projesi ve Hackathon. Zeynep'in 'Akıllı Şehir' çözümünü sunduğu final.",
+    features: ["Makine Öğrenmesi", "Capstone Proje", "Sunum Teknikleri"],
     tag: "İLERİ SEVİYE",
     tagColor: "bg-amber-500",
     accentColor: "text-amber-400",
@@ -140,20 +140,29 @@ export default function HomePage() {
         >
           {/* Main Title */}
           <h1 className="font-display font-black text-6xl md:text-8xl tracking-tighter text-white leading-[0.9] drop-shadow-2xl">
-            GELECEĞİNE <br />
+            ZEYNEP'İN <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-emerald-500 to-white">
-              YÖN VER
+              HİKAYESİ
             </span>
           </h1>
 
+          {/* Impact Ticker */}
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-sm font-medium text-emerald-400">Canlı: Şu an DiGEM'de 28 öğrenci kodluyor</span>
+          </div>
+
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-slate-300 max-w-2xl mt-4 font-light leading-relaxed">
-            Eskişehir DİGEM'in kalbinde, teknoloji ve inovasyonla harmanlanmış yeni nesil hibrit eğitim deneyimi.
+            Meteoroloji Mühendisliğinden Veri Bilimciliğine uzanan 12 haftalık gerçek bir dönüşüm hikayesi.
           </p>
 
           {/* Scroll Indicator */}
           <div className="mt-12 flex flex-col items-center gap-3 animate-bounce">
-            <span className="text-xs text-slate-400 tracking-widest uppercase">Keşfetmek için kaydır</span>
+            <span className="text-xs text-slate-400 tracking-widest uppercase">Yolculuğu Keşfet</span>
             <ChevronDown className="size-5 text-white/50" />
           </div>
         </motion.div>
@@ -434,7 +443,7 @@ export default function HomePage() {
       <section id="contact" className="py-24 bg-[#111722] relative border-t border-white/5 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row gap-16">
-             {/* Text Content */}
+            {/* Text Content */}
             <div className="flex-1">
               <span className="text-emerald-500 font-medium tracking-widest text-sm uppercase mb-4 block">
                 İletişim
@@ -445,16 +454,16 @@ export default function HomePage() {
               <p className="text-slate-400 text-lg mb-8 leading-relaxed">
                 Eskişehir DİGEM'deki atölyelerimiz, eğitimlerimiz ve işbirlikleri hakkında detaylı bilgi almak için bize ulaşın.
               </p>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                   </div>
                   <div>
                     <h3 className="text-white font-bold mb-1">Adres</h3>
                     <p className="text-slate-400">
-                      Uluönder, Rauf Orbay Cd. No:9<br/>
+                      Uluönder, Rauf Orbay Cd. No:9<br />
                       26200 Tepebaşı/Eskişehir
                     </p>
                   </div>
@@ -462,7 +471,7 @@ export default function HomePage() {
 
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
                   </div>
                   <div>
                     <h3 className="text-white font-bold mb-1">E-posta</h3>
@@ -474,7 +483,7 @@ export default function HomePage() {
 
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                   </div>
                   <div>
                     <h3 className="text-white font-bold mb-1">Telefon</h3>
@@ -488,7 +497,7 @@ export default function HomePage() {
 
             {/* Map Placeholder */}
             <div className="flex-1 h-[400px] bg-[#0a0a0a] rounded-2xl border border-white/10 overflow-hidden relative group">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3066.077271810486!2d30.50554877651046!3d39.78280367154867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cc15e610660a5d%3A0x69c4558cd6a0c0e7!2sAnadolu%20University!5e0!3m2!1sen!2str!4v1707475000000!5m2!1sen!2str" width="100%" height="100%" style={{border:0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="opacity-60 group-hover:opacity-100 transition-opacity duration-500"></iframe>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3066.077271810486!2d30.50554877651046!3d39.78280367154867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cc15e610660a5d%3A0x69c4558cd6a0c0e7!2sAnadolu%20University!5e0!3m2!1sen!2str!4v1707475000000!5m2!1sen!2str" width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="opacity-60 group-hover:opacity-100 transition-opacity duration-500"></iframe>
             </div>
           </div>
         </div>

@@ -1,74 +1,59 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { DEMO_STAGES, DemoStage, DemoUser } from "./demo-data";
-import { toast } from "sonner";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { DemoEngine } from "./demo/engine";
+import { LearnerState, DemoAction, DemoScenario } from "./demo/types";
+
+// Placeholder for the default scenario. 
+// In the next step, we will import the real 'ZEYNEP_SCENARIO' from @/lib/content/scenarios
+const DEFAULT_SCENARIO: DemoScenario = {
+    id: "default",
+    name: "Zeynep Kaya - Standart Akış",
+    description: "Sıfırdan mezuniyete Data Science yolculuğu.",
+    initialState: {
+        name: "Zeynep",
+        role: "student",
+        level: "cirak",
+        xp: 0,
+        phase: "onboarding"
+    },
+    actions: [],
+};
 
 interface DemoContextType {
-    currentStage: DemoStage;
-    currentUser: DemoUser;
-    setStage: (stage: DemoStage) => void;
-    nextStage: () => void;
-    prevStage: () => void;
-    isDemoMode: boolean;
+    state: LearnerState;
+    dispatch: (action: DemoAction) => void;
+    resetDemo: () => void;
+    engine: DemoEngine;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export function DemoProvider({ children }: { children: React.ReactNode }) {
-    const [currentStage, setCurrentStage] = useState<DemoStage>("onboarding");
-    const [isDemoMode, setIsDemoMode] = useState(true);
+    // Initialize Engine
+    // We use a lazy initializer to ensure the engine is created only once per page load
+    const [engine] = useState(() => new DemoEngine(DEFAULT_SCENARIO));
+    const [state, setState] = useState<LearnerState>(engine.getState());
 
-    const currentUser = DEMO_STAGES[currentStage].user;
-
-    const setStage = (stage: DemoStage) => {
-        setCurrentStage(stage);
-        toast.success(`Demo Sahnesi Değiştirildi: ${DEMO_STAGES[stage].label}`, {
-            description: DEMO_STAGES[stage].context,
-        });
-    };
-
-    const stages = Object.keys(DEMO_STAGES) as DemoStage[];
-
-    const nextStage = () => {
-        const currentIndex = stages.indexOf(currentStage);
-        if (currentIndex < stages.length - 1) {
-            setStage(stages[currentIndex + 1]);
-        }
-    };
-
-    const prevStage = () => {
-        const currentIndex = stages.indexOf(currentStage);
-        if (currentIndex > 0) {
-            setStage(stages[currentIndex - 1]);
-        }
-    };
-
-    // Keyboard shortcuts for demo control
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey && e.key === "ArrowRight") {
-                nextStage();
-            } else if (e.ctrlKey && e.key === "ArrowLeft") {
-                prevStage();
-            }
-        };
+        // Subscribe to engine updates to trigger re-renders
+        const unsubscribe = engine.subscribe((newState) => {
+            setState({ ...newState }); // Spread to ensure new reference
+        });
+        return unsubscribe;
+    }, [engine]);
 
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [currentStage]);
+    const dispatch = useCallback((action: DemoAction) => {
+        engine.dispatch(action);
+    }, [engine]);
+
+    const resetDemo = useCallback(() => {
+        // Reload to reset the engine state to initial
+        window.location.reload();
+    }, []);
 
     return (
-        <DemoContext.Provider
-            value={{
-                currentStage,
-                currentUser,
-                setStage,
-                nextStage,
-                prevStage,
-                isDemoMode,
-            }}
-        >
+        <DemoContext.Provider value={{ state, dispatch, resetDemo, engine }}>
             {children}
         </DemoContext.Provider>
     );

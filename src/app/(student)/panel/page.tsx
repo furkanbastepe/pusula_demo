@@ -18,7 +18,9 @@ import { QuickFeed } from "@/components/panel/QuickFeed";
 import { BuddyCard } from "@/components/buddy/BuddyCard";
 import { StreakBadge } from "@/components/gamification/StreakBadge";
 import { useDemo } from "@/lib/DemoContext";
-import { DEMO_STAGES } from "@/lib/demo-data";
+import { getDashboardData } from "@/lib/demo/selectors";
+// import { DEMO_STAGES } from "@/lib/demo-data"; // Removed dependency
+
 
 // Animation variants
 const fadeInUp = {
@@ -59,13 +61,13 @@ function AnimatedSection({ children, delay = 0, className = "" }: { children: Re
 }
 
 export default function PanelPage() {
-    const { currentUser, currentStage } = useDemo();
-    const dashboardData = DEMO_STAGES[currentStage].dashboardData;
-    const { currentModule, activeTasks, upcomingEvents, feedItems } = dashboardData;
+    const { state: currentUser } = useDemo(); // state renamed to currentUser for compatibility/clarity
+    const { nextBestAction, currentModule, activeTasks, upcomingEvents, feedItems } = getDashboardData(currentUser);
 
-    const xpPercent = (currentUser.xp / currentUser.xpToNext) * 100;
+    const xpPercent = Math.min(100, (currentUser.xp / 1000) * 100); // Mock max XP for bar
     const level = currentUser.level as string;
     const nextLevel = level === "cirak" ? "kalfa" : level === "kalfa" ? "usta" : "mezun";
+
 
     return (
         <motion.div
@@ -92,8 +94,12 @@ export default function PanelPage() {
                             Merhaba, {currentUser.name}! 👋
                         </h1>
                         <p className="mt-1 text-muted-foreground">
-                            {DEMO_STAGES[currentStage].context}
+                            {currentUser.phase === 'discovery' ? 'Keşif Fazı: Dijital dünyayı anlama zamanı.' :
+                                currentUser.phase === 'build' ? 'İnşa Fazı: Projelerle yeteneklerini geliştir.' :
+                                    currentUser.phase === 'impact' ? 'Etki Fazı: Dünyayı değiştirecek çözümler üret.' :
+                                        'Pusula Yolculuğuna Hoşgeldin!'}
                         </p>
+
                     </motion.div>
 
                     {/* Stats Row */}
@@ -122,205 +128,78 @@ export default function PanelPage() {
                 </div>
             </motion.header>
 
-            {/* Main Grid */}
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Left Column - 2/3 width */}
                 <div className="space-y-6 lg:col-span-2">
-                    {/* Hero Card - Current Progress */}
-                    {/* Only show if there is a current module */}
-                    {currentModule.lessons.length > 0 && (
-                        <AnimatedSection delay={0.1}>
-                            <motion.div
-                                whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-                            >
-                                <Card className="overflow-hidden border-border bg-card/80 backdrop-blur">
-                                    <CardHeader className="pb-3">
-                                        <div className="flex items-center justify-between">
-                                            <CardTitle className="flex items-center gap-2 text-lg">
-                                                <motion.div
-                                                    animate={{ rotate: [0, 10, -10, 0] }}
-                                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                                                >
-                                                    <MaterialIcon name="school" className="text-primary" />
-                                                </motion.div>
-                                                Şu anki modül
-                                            </CardTitle>
-                                            {currentUser.sdg > 0 && <SDGBadge sdg={currentUser.sdg} variant="small" />}
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-4">
+
+                    {/* NEXT BEST ACTION CARD (Replaces generic Current Module) */}
+                    <AnimatedSection delay={0.1}>
+                        <motion.div whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}>
+                            <Card className="overflow-hidden border-emerald-500/30 bg-card/80 backdrop-blur ring-1 ring-emerald-500/20">
+                                <CardHeader className="pb-3 border-b border-white/5 bg-emerald-500/5">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="flex items-center gap-2 text-lg text-emerald-400">
+                                            <motion.div
+                                                animate={{ rotate: [0, 10, -10, 0] }}
+                                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                            >
+                                                <MaterialIcon name="bolt" className="text-emerald-400" filled />
+                                            </motion.div>
+                                            Sıradaki Adım
+                                        </CardTitle>
+                                        <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
+                                            +{nextBestAction.xp} XP
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <div className="flex flex-col gap-4 sm:flex-row">
+                                        {/* Thumbnail (if microlab) */}
+                                        {nextBestAction.thumbnail && (
+                                            <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-lg sm:w-48">
+                                                <img
+                                                    src={nextBestAction.thumbnail}
+                                                    alt={nextBestAction.title}
+                                                    className="h-full w-full object-cover transition-transform hover:scale-105"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="flex-1 space-y-3">
                                             <div>
                                                 <h3 className="font-display text-xl font-semibold text-foreground">
-                                                    {currentModule.title}
+                                                    {nextBestAction.title}
                                                 </h3>
-                                                <p className="mt-1 text-sm text-muted-foreground">
-                                                    Şu an: {currentModule.currentLesson}
+                                                <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                                                    {nextBestAction.description}
                                                 </p>
                                             </div>
 
-                                            {/* Progress Bar */}
-                                            <div className="space-y-2">
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-muted-foreground">İlerleme</span>
-                                                    <span className="font-semibold text-foreground">{currentModule.progress}%</span>
-                                                </div>
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: "100%" }}
-                                                    transition={{ duration: 0.5, delay: 0.3 }}
-                                                >
-                                                    <Progress value={currentModule.progress} className="h-2 bg-secondary" />
-                                                </motion.div>
-                                            </div>
-
-                                            {/* Lesson Pills */}
-                                            <motion.div
-                                                className="flex flex-wrap gap-2"
-                                                variants={staggerContainer}
-                                                initial="hidden"
-                                                animate="visible"
-                                            >
-                                                {currentModule.lessons.map((lesson) => (
-                                                    <motion.div
-                                                        key={lesson.id}
-                                                        variants={scaleIn}
-                                                        whileHover={{ scale: 1.05 }}
-                                                        className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium cursor-pointer transition-colors ${lesson.done
-                                                            ? "bg-primary/20 text-primary"
-                                                            : lesson.current
-                                                                ? "bg-primary text-black glow-green"
-                                                                : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                                                            }`}
-                                                    >
-                                                        {lesson.done && <MaterialIcon name="check" size="sm" />}
-                                                        {lesson.current && (
-                                                            <motion.div
-                                                                animate={{ scale: [1, 1.2, 1] }}
-                                                                transition={{ duration: 1, repeat: Infinity }}
-                                                            >
-                                                                <MaterialIcon name="play_arrow" size="sm" />
-                                                            </motion.div>
-                                                        )}
-                                                        {lesson.title}
-                                                    </motion.div>
-                                                ))}
-                                            </motion.div>
-
-                                            {/* Continue Button */}
-                                            <Link href="/ogren">
-                                                <motion.div
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                >
-                                                    <Button className="w-full bg-primary text-black hover:bg-primary/90 glow-green">
-                                                        <MaterialIcon name="play_arrow" size="sm" className="mr-2" />
-                                                        Derse Devam Et
-                                                    </Button>
-                                                </motion.div>
+                                            {/* Action Button */}
+                                            <Link href={nextBestAction.actionUrl}>
+                                                <Button className="w-full bg-emerald-600 text-white hover:bg-emerald-500 sm:w-auto">
+                                                    <MaterialIcon name="play_arrow" size="sm" className="mr-2" />
+                                                    {nextBestAction.type === 'microlab' ? 'Derse Başla' : 'Görevi Görüntüle'}
+                                                </Button>
                                             </Link>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        </AnimatedSection>
-                    )}
+                                    </div>
 
-                    {/* Etkinlikler Section - Highlighted in Bot Arena stage */}
-                    <AnimatedSection delay={0.15}>
-                        <Card className={`border-border bg-card/80 backdrop-blur overflow-hidden ${currentStage === 'bot-arena' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}>
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="flex items-center gap-2 text-lg">
-                                        <motion.div
-                                            animate={{ rotate: [0, 15, -15, 0] }}
-                                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
-                                        >
-                                            <MaterialIcon name="celebration" className="text-chart-5" />
-                                        </motion.div>
-                                        Etkinlikler
-                                    </CardTitle>
-                                    <Link href="/etkinlikler">
-                                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                                            Tümü
-                                            <MaterialIcon name="chevron_right" size="sm" />
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <Link href="/etkinlikler/bot-arena">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, y: -2 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="group relative overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-[#10221c] to-[#0d1619] p-4 cursor-pointer transition-all hover:border-emerald-500/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]"
-                                    >
-                                        {/* Background Grid Effect */}
-                                        <div
-                                            className="absolute inset-0 opacity-10"
-                                            style={{
-                                                backgroundImage: "linear-gradient(rgba(16,185,129,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.3) 1px, transparent 1px)",
-                                                backgroundSize: "20px 20px",
-                                            }}
-                                        />
-
-                                        <div className="relative z-10 flex items-start gap-4">
-                                            {/* Icon */}
-                                            <motion.div
-                                                className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
-                                                animate={{ y: [0, -3, 0] }}
-                                                transition={{ duration: 2, repeat: Infinity }}
-                                            >
-                                                <MaterialIcon name="smart_toy" className="text-2xl" />
-                                            </motion.div>
-
-                                            {/* Content */}
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="font-display text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
-                                                        🤖 Oyun Botu Yapma Yarışması
-                                                    </h3>
-                                                    <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs animate-pulse">
-                                                        CANLI
-                                                    </Badge>
-                                                </div>
-                                                <p className="text-sm text-gray-400 mb-3 leading-relaxed">
-                                                    Python veya JavaScript ile yapay zeka destekli oyun botu geliştir!
-                                                    Diğer öğrencilerin botlarıyla yarış, algoritma optimizasyonu yap ve
-                                                    liderlik tablosunda zirveye çık.
-                                                </p>
-
-                                                {/* Stats */}
-                                                <div className="flex flex-wrap items-center gap-4 text-xs">
-                                                    <div className="flex items-center gap-1.5 text-emerald-400">
-                                                        <MaterialIcon name="groups" className="text-sm" />
-                                                        <span>24 Katılımcı</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-yellow-400">
-                                                        <MaterialIcon name="emoji_events" className="text-sm" />
-                                                        <span>500 XP Ödül</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-blue-400">
-                                                        <MaterialIcon name="timer" className="text-sm" />
-                                                        <span>3 Gün Kaldı</span>
-                                                    </div>
-                                                </div>
+                                    {/* Module Progress (only if currentModule exists and matches action) */}
+                                    {currentModule && nextBestAction.type === 'microlab' && (
+                                        <div className="mt-4 space-y-2 border-t border-white/5 pt-4">
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                <span>{currentModule.title}</span>
+                                                <span>%{currentModule.progress} Tamamlandı</span>
                                             </div>
-
-                                            {/* Arrow */}
-                                            <motion.div
-                                                animate={{ x: [0, 5, 0] }}
-                                                transition={{ duration: 1.5, repeat: Infinity }}
-                                                className="text-emerald-500/50 group-hover:text-emerald-500 transition-colors"
-                                            >
-                                                <MaterialIcon name="arrow_forward" className="text-xl" />
-                                            </motion.div>
+                                            <Progress value={currentModule.progress} className="h-1.5 bg-secondary" />
                                         </div>
-                                    </motion.div>
-                                </Link>
-                            </CardContent>
-                        </Card>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
                     </AnimatedSection>
+
 
                     <AnimatedSection delay={0.2}>
                         <Card className="border-border bg-card/80 backdrop-blur">
@@ -356,8 +235,8 @@ export default function PanelPage() {
                                                     <div className="group flex items-center justify-between rounded-lg bg-secondary/30 p-3 transition-all hover:bg-secondary/50">
                                                         <div className="flex items-center gap-3">
                                                             <motion.div
-                                                                className={`flex h-10 w-10 items-center justify-center rounded-lg ${task.difficulty === "easy" ? "bg-green-500/20 text-green-400" :
-                                                                    task.difficulty === "med" ? "bg-yellow-500/20 text-yellow-400" :
+                                                                className={`flex h-10 w-10 items-center justify-center rounded-lg ${task.difficulty === "Kolay" ? "bg-green-500/20 text-green-400" :
+                                                                    task.difficulty === "Orta" ? "bg-yellow-500/20 text-yellow-400" :
                                                                         "bg-red-500/20 text-red-400"
                                                                     }`}
                                                                 whileHover={{ rotate: 5 }}
@@ -442,7 +321,8 @@ export default function PanelPage() {
                                         >
                                             {currentUser.xp}
                                         </motion.div>
-                                        <div className="text-xs text-muted-foreground">/ {currentUser.xpToNext} XP</div>
+                                        {/* Mock XP target as we removed xpToNext from state */}
+                                        <div className="text-xs text-muted-foreground">/ 5000 XP</div>
                                     </div>
                                 </div>
                                 <motion.div
@@ -454,7 +334,7 @@ export default function PanelPage() {
                                     <Progress value={xpPercent} className="h-3 bg-secondary" />
                                 </motion.div>
                                 <p className="text-center text-sm text-muted-foreground">
-                                    <span className="font-semibold text-primary">{currentUser.xpToNext - currentUser.xp} XP</span> daha kazanırsan{" "}
+                                    <span className="font-semibold text-primary">{5000 - currentUser.xp} XP</span> daha kazanırsan{" "}
                                     <span className="font-semibold text-foreground capitalize">{nextLevel}</span> olacaksın!
                                 </p>
                             </CardContent>
@@ -467,6 +347,26 @@ export default function PanelPage() {
                             gdrScore={currentUser.gdrScore}
                             components={currentUser.gdrComponents}
                         />
+                    </AnimatedSection>
+
+                    {/* SDG Card */}
+                    <AnimatedSection delay={0.35}>
+                        <Card className="border-border bg-card/80 backdrop-blur">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="flex items-center gap-2 text-lg">
+                                    <MaterialIcon name="public" className="text-blue-400" />
+                                    Odaklanılan SDG
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/20 border border-white/5">
+                                    <SDGBadge sdg={currentUser.sdg} variant="large" showName className="w-full justify-center" />
+                                    <p className="mt-3 text-center text-xs text-muted-foreground">
+                                        Bu hedef doğrultusunda projeler geliştiriyorsun.
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </AnimatedSection>
 
                     {/* Buddy Card */}

@@ -2,316 +2,240 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MaterialIcon } from "@/components/common/MaterialIcon";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { useDemo } from "@/lib/DemoContext";
+import { toast } from "sonner";
 
-// Mock data
-const pendingReviews = [
-    {
-        id: "r1",
-        student: { name: "Ahmet Yılmaz", avatar: null },
-        task: "3 Dakikalık Mikro Sunum",
-        submittedAt: "2 saat önce",
-        cohort: "İklim Savaşçıları",
-        priority: "high",
-    },
-    {
-        id: "r2",
-        student: { name: "Elif Demir", avatar: null },
-        task: "Veri Görselleştirme",
-        submittedAt: "5 saat önce",
-        cohort: "İklim Savaşçıları",
-        priority: "normal",
-    },
-    {
-        id: "r3",
-        student: { name: "Can Öztürk", avatar: null },
-        task: "Problem Kartı",
-        submittedAt: "1 gün önce",
-        cohort: "Su Koruyucuları",
-        priority: "low",
-    },
+interface MockStudent {
+    id: string;
+    name: string;
+    xp: number;
+    level: string;
+    status: "active" | "online" | "offline";
+    task: string;
+    progress: number;
+    isUser?: boolean;
+}
+
+// Mock data generator for other students
+const generateMockStudents = (): MockStudent[] => [
+    { id: "s1", name: "Ahmet Yılmaz", xp: 1250, level: "Çırak", status: "active", task: "Veri Temizliği", progress: 65 },
+    { id: "s2", name: "Elif Demir", xp: 2100, level: "Kalfa", status: "online", task: "Capstone Proje", progress: 30 },
+    { id: "s3", name: "Can Öztürk", xp: 800, level: "Yeni", status: "offline", task: "Python Giriş", progress: 90 },
+    { id: "s4", name: "Selin Kaya", xp: 1850, level: "Kalfa", status: "active", task: "Veri Görselleştirme", progress: 10 },
+    { id: "s5", name: "Burak Yıldız", xp: 450, level: "Yeni", status: "offline", task: "Algoritma Mantığı", progress: 100 },
 ];
-
-const cohorts = [
-    { id: "c1", name: "İklim Savaşçıları", sdg: 13, students: 12, active: 10, progress: 45 },
-    { id: "c2", name: "Su Koruyucuları", sdg: 6, students: 8, active: 7, progress: 30 },
-];
-
-const recentActivity = [
-    { id: "a1", type: "review", message: "Zeynep'in görevini onayladın", time: "30 dk önce" },
-    { id: "a2", type: "checkin", message: "5 öğrenci check-in yaptı", time: "2 saat önce" },
-    { id: "a3", type: "workshop", message: "Mentor Klinik başlıyor", time: "Yarın 14:00" },
-];
-
-const stats = {
-    totalStudents: 20,
-    activeToday: 15,
-    pendingReviews: 3,
-    avgGDR: 52,
-};
 
 export default function RehberPage() {
+    const { state } = useDemo();
+    const [students] = useState<MockStudent[]>(generateMockStudents());
+
+    // Merge current user (Zeynep) into the list
+    const allStudents: MockStudent[] = [
+        {
+            id: "me",
+            name: state.name,
+            xp: state.xp,
+            level: state.level,
+            status: "online",
+            task: "Aktif Görev", // Dynamic based on state could be better but simplified
+            progress: 75,
+            isUser: true
+        },
+        ...students
+    ].sort((a, b) => b.xp - a.xp);
+
+    const stats = {
+        totalStudents: allStudents.length,
+        activeToday: allStudents.filter(s => s.status !== "offline").length,
+        avgXP: Math.round(allStudents.reduce((a, s) => a + s.xp, 0) / allStudents.length),
+        cohortProgress: 42 // Mock global progress
+    };
+
     return (
         <div className="min-h-screen bg-gradient-hero p-4 md:p-6">
-            {/* Page Header */}
             <header className="mb-6">
                 <Breadcrumb />
-                <div className="mt-4">
-                    <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
-                        Rehber Paneli
-                    </h1>
-                    <p className="mt-1 text-muted-foreground">
-                        Hoş geldin! Bugün {stats.activeToday} öğrenci aktif.
-                    </p>
+                <div className="mt-4 flex items-center justify-between">
+                    <div>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Rehber Paneli
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
+                            İklim Savaşçıları Kohortu • {stats.activeToday} öğrenci çevrimiçi
+                        </p>
+                    </div>
+                    <Button onClick={() => toast.success("Rapor oluşturuldu ve e-postana gönderildi.")}>
+                        <MaterialIcon name="download" className="mr-2" />
+                        Raporu İndir
+                    </Button>
                 </div>
             </header>
 
             {/* Stats Cards */}
             <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
                 <Card className="border-border bg-card/80 backdrop-blur">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
-                                <MaterialIcon name="people" className="text-blue-400" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-foreground">{stats.totalStudents}</div>
-                                <div className="text-xs text-muted-foreground">Toplam Öğrenci</div>
-                            </div>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                            <MaterialIcon name="groups" size="md" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-foreground">{stats.totalStudents}</div>
+                            <div className="text-xs text-muted-foreground">Toplam Öğrenci</div>
                         </div>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-card/80 backdrop-blur">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                                <MaterialIcon name="check_circle" className="text-primary" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-foreground">{stats.activeToday}</div>
-                                <div className="text-xs text-muted-foreground">Bugün Aktif</div>
-                            </div>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                            <MaterialIcon name="online_prediction" size="md" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-foreground">{stats.activeToday}</div>
+                            <div className="text-xs text-muted-foreground">Aktif Öğrenci</div>
                         </div>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-card/80 backdrop-blur">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/20">
-                                <MaterialIcon name="pending_actions" className="text-destructive" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-foreground">{stats.pendingReviews}</div>
-                                <div className="text-xs text-muted-foreground">Bekleyen İnceleme</div>
-                            </div>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-400">
+                            <MaterialIcon name="stars" size="md" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-foreground">{stats.avgXP}</div>
+                            <div className="text-xs text-muted-foreground">Ortalama XP</div>
                         </div>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-card/80 backdrop-blur">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
-                                <MaterialIcon name="radar" className="text-purple-400" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-foreground">{stats.avgGDR}</div>
-                                <div className="text-xs text-muted-foreground">Ortalama GDR</div>
-                            </div>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                            <MaterialIcon name="trending_up" size="md" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-foreground">%{stats.cohortProgress}</div>
+                            <div className="text-xs text-muted-foreground">Kohort İlerlemesi</div>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Main Grid */}
             <div className="grid gap-6 lg:grid-cols-3">
-                {/* Left Column - 2/3 */}
-                <div className="space-y-6 lg:col-span-2">
-                    {/* Pending Reviews */}
+                {/* Student List */}
+                <div className="lg:col-span-2 space-y-6">
                     <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="flex items-center gap-2 text-lg">
-                                    <MaterialIcon name="rate_review" className="text-destructive" />
-                                    Bekleyen İncelemeler
-                                    <Badge className="bg-destructive/20 text-destructive border-0 ml-2">
-                                        {pendingReviews.length}
-                                    </Badge>
-                                </CardTitle>
-                                <Link href="/rehber/incelemeler">
-                                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                                        Tümü
-                                        <MaterialIcon name="chevron_right" size="sm" />
-                                    </Button>
-                                </Link>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {pendingReviews.map((review) => (
-                                    <Link key={review.id} href={`/rehber/inceleme/${review.id}`}>
-                                        <div className="group flex items-center justify-between rounded-lg bg-secondary/30 p-3 transition-all hover:bg-secondary/50">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                                                    {review.student.name.split(" ").map(n => n[0]).join("")}
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-foreground group-hover:text-primary transition-colors">
-                                                        {review.student.name}
-                                                    </p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {review.task} • {review.submittedAt}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Badge className={`${review.priority === "high"
-                                                        ? "bg-destructive/20 text-destructive"
-                                                        : review.priority === "normal"
-                                                            ? "bg-yellow-500/20 text-yellow-400"
-                                                            : "bg-secondary text-muted-foreground"
-                                                    } border-0`}>
-                                                    {review.priority === "high" ? "Acil" : review.priority === "normal" ? "Normal" : "Düşük"}
-                                                </Badge>
-                                                <MaterialIcon name="chevron_right" className="text-muted-foreground group-hover:text-primary transition-colors" />
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Cohorts */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="flex items-center gap-2 text-lg">
-                                    <MaterialIcon name="groups" className="text-chart-2" />
-                                    Kohortlar
-                                </CardTitle>
-                                <Link href="/rehber/kohortlar">
-                                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                                        Tümü
-                                        <MaterialIcon name="chevron_right" size="sm" />
-                                    </Button>
-                                </Link>
-                            </div>
+                        <CardHeader>
+                            <CardTitle>Öğrenci Listesi</CardTitle>
+                            <CardDescription>Gerçek zamanlı ilerleme takibi</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {cohorts.map((cohort) => (
-                                    <Link key={cohort.id} href={`/rehber/kohort/${cohort.id}`}>
-                                        <div className="group rounded-lg bg-secondary/30 p-4 transition-all hover:bg-secondary/50">
-                                            <div className="flex items-center justify-between mb-3">
+                                {allStudents.map((student, index) => (
+                                    <motion.div
+                                        key={student.id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className={`p-4 rounded-xl border transition-all ${student.isUser
+                                                ? "bg-primary/5 border-primary/50 shadow-lg shadow-primary/5"
+                                                : "bg-secondary/20 border-border hover:bg-secondary/40"
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-10 w-10 border border-border">
+                                                    <AvatarFallback className={student.isUser ? "bg-primary text-black" : "bg-muted"}>
+                                                        {student.name.substring(0, 2).toUpperCase()}
+                                                    </AvatarFallback>
+                                                </Avatar>
                                                 <div>
-                                                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                                        {cohort.name}
-                                                    </h3>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        SDG {cohort.sdg} • {cohort.students} öğrenci
-                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-foreground">{student.name}</span>
+                                                        {student.isUser && <Badge className="bg-primary/20 text-primary border-0 text-[10px]">SEN</Badge>}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <span className={`w-2 h-2 rounded-full ${student.status === "online" ? "bg-emerald-500 animate-pulse" : "bg-slate-500"}`}></span>
+                                                        {student.status === "online" ? "Çevrimiçi" : student.status === "active" ? "Son görülme 1s" : "Çevrimdışı"}
+                                                    </div>
                                                 </div>
-                                                <Badge className="bg-primary/20 text-primary border-0">
-                                                    {cohort.active} aktif
-                                                </Badge>
                                             </div>
-                                            <div className="space-y-1">
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-muted-foreground">Genel İlerleme</span>
-                                                    <span className="text-foreground font-medium">{cohort.progress}%</span>
-                                                </div>
-                                                <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-primary rounded-full transition-all"
-                                                        style={{ width: `${cohort.progress}%` }}
-                                                    />
-                                                </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-bold text-primary">{student.xp} XP</div>
+                                                <div className="text-xs text-muted-foreground">{student.level}</div>
                                             </div>
                                         </div>
-                                    </Link>
+
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                                <span>Aktif Görev: {student.task}</span>
+                                                <span>%{student.progress}</span>
+                                            </div>
+                                            <Progress value={student.progress} className="h-1.5" />
+                                        </div>
+                                    </motion.div>
                                 ))}
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Right Column - 1/3 */}
+                {/* Right Column */}
                 <div className="space-y-6">
-                    {/* Quick Actions */}
+                    {/* Event Management Mock */}
                     <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <MaterialIcon name="bolt" className="text-chart-4" />
-                                Hızlı İşlemler
-                            </CardTitle>
+                        <CardHeader>
+                            <CardTitle>Etkinlik Yönetimi</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                            <Link href="/rehber/ogrenciler">
-                                <Button variant="outline" className="w-full justify-start border-border hover:border-primary">
-                                    <MaterialIcon name="people" size="sm" className="mr-2 text-blue-400" />
-                                    Öğrenci Listesi
-                                </Button>
-                            </Link>
-                            <Link href="/rehber/checkin">
-                                <Button variant="outline" className="w-full justify-start border-border hover:border-primary">
-                                    <MaterialIcon name="qr_code" size="sm" className="mr-2 text-primary" />
-                                    Check-in Kiosk
-                                </Button>
-                            </Link>
-                            <Link href="/rehber/atolyeler">
-                                <Button variant="outline" className="w-full justify-start border-border hover:border-primary">
-                                    <MaterialIcon name="event" size="sm" className="mr-2 text-purple-400" />
-                                    Atölye Planla
-                                </Button>
-                            </Link>
-                            <Link href="/rehber/rapor">
-                                <Button variant="outline" className="w-full justify-start border-border hover:border-primary">
-                                    <MaterialIcon name="bar_chart" size="sm" className="mr-2 text-chart-4" />
-                                    Haftalık Rapor
-                                </Button>
-                            </Link>
+                        <CardContent className="space-y-4">
+                            <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => toast.info("Mock: Yeni etkinlik oluşturma modalı açıldı")}>
+                                <MaterialIcon name="add" className="mr-2" />
+                                Yeni Etkinlik Ekle
+                            </Button>
+
+                            <div className="space-y-3 mt-4">
+                                <h4 className="text-sm font-semibold text-muted-foreground">Yaklaşan Etkinlikler</h4>
+                                <div className="p-3 bg-secondary/30 rounded-lg border border-border">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-medium text-sm">Bot Arena Finali</div>
+                                            <div className="text-xs text-muted-foreground">3 gün kaldı</div>
+                                        </div>
+                                        <Badge variant="outline" className="text-[10px]">Yarışma</Badge>
+                                    </div>
+                                    <div className="mt-2 flex -space-x-2">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="w-6 h-6 rounded-full bg-slate-700 border border-slate-900 flex items-center justify-center text-[8px]">
+                                                {i}
+                                            </div>
+                                        ))}
+                                        <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-900 flex items-center justify-center text-[8px] text-muted-foreground">+24</div>
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
-                    {/* Recent Activity */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <MaterialIcon name="history" className="text-chart-3" />
-                                Son Aktivite
+                    {/* AI Insights Mock */}
+                    <Card className="border-border bg-gradient-to-br from-purple-900/20 to-blue-900/20 backdrop-blur">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <MaterialIcon name="auto_awesome" className="text-purple-400" />
+                                AI Asistanı
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-3">
-                                {recentActivity.map((activity) => (
-                                    <div key={activity.id} className="flex items-center gap-3">
-                                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${activity.type === "review"
-                                                ? "bg-primary/20 text-primary"
-                                                : activity.type === "checkin"
-                                                    ? "bg-blue-500/20 text-blue-400"
-                                                    : "bg-purple-500/20 text-purple-400"
-                                            }`}>
-                                            <MaterialIcon
-                                                name={
-                                                    activity.type === "review"
-                                                        ? "check"
-                                                        : activity.type === "checkin"
-                                                            ? "login"
-                                                            : "event"
-                                                }
-                                                size="sm"
-                                            />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-foreground truncate">{activity.message}</p>
-                                            <p className="text-xs text-muted-foreground">{activity.time}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-sm text-purple-200">
+                                <p className="mb-2"><strong>Dikkat:</strong> 3 öğrenci "Python Değişkenler" konusunda takıldı. Ek kaynak paylaşmamı ister misin?</p>
+                                <Button size="sm" variant="secondary" className="w-full h-8 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border-0">
+                                    Kaynakları Gönder
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>

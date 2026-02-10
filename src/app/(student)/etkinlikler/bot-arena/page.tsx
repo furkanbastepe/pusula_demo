@@ -48,10 +48,10 @@ if __name__ == "__main__":
     };
 
     const leaderboard = [
-        { rank: 1, name: "You", lang: "Python 3.8", score: 1500, status: "running", isYou: true },
-        { rank: 2, name: "User_Alpha", lang: "NodeJS", score: 1450, status: "waiting" },
-        { rank: 3, name: "Cyber_Student", lang: "C++", score: 1300, status: "completed" },
-        { rank: 4, name: "Dev_Wizard", lang: "Python 3.8", score: 1250, status: "failed" },
+        { rank: 1, name: "Sen", lang: "Python 3.8", score: 1500, status: "running", isYou: true },
+        { rank: 2, name: "Kullanıcı_Alpha", lang: "NodeJS", score: 1450, status: "waiting" },
+        { rank: 3, name: "Siber_Öğrenci", lang: "C++", score: 1300, status: "completed" },
+        { rank: 4, name: "Dev_Sihirbazı", lang: "Python 3.8", score: 1250, status: "failed" },
     ];
 
     const getStatusColor = (status: string) => {
@@ -66,6 +66,21 @@ if __name__ == "__main__":
                 return "bg-red-500/20 text-red-400 border-red-500/30";
             default:
                 return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case "running":
+                return "Çalışıyor";
+            case "waiting":
+                return "Bekliyor";
+            case "completed":
+                return "Tamamlandı";
+            case "failed":
+                return "Başarısız";
+            default:
+                return status;
         }
     };
 
@@ -95,7 +110,7 @@ if __name__ == "__main__":
                     <div className="h-4 w-px bg-[#23483c]"></div>
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
                         <MaterialIcon name="flag" className="text-emerald-500 text-lg" />
-                        <span>Round 3: Data Extraction</span>
+                        <span>Tur 3: Veri Çıkarma</span>
                     </div>
                 </div>
 
@@ -115,8 +130,8 @@ if __name__ == "__main__":
                     <div className="h-8 w-px bg-[#23483c] hidden lg:block"></div>
                     <div className="flex items-center gap-3">
                         <div className="text-right hidden sm:block">
-                            <div className="text-sm font-bold text-white">Cyber_Student</div>
-                            <div className="text-xs text-emerald-500">Level 12 • 1300 XP</div>
+                            <div className="text-sm font-bold text-white">Siber_Öğrenci</div>
+                            <div className="text-xs text-emerald-500">Seviye 12 • 1300 XP</div>
                         </div>
                         <div className="bg-emerald-500/20 rounded-full size-10 ring-2 ring-emerald-500/20 flex items-center justify-center">
                             <MaterialIcon name="person" className="text-emerald-500" />
@@ -155,17 +170,17 @@ if __name__ == "__main__":
                     <div className="bg-[#19332b]/50 border-b border-[#23483c] p-4">
                         <h3 className="text-white text-sm font-bold flex items-center gap-2 mb-2">
                             <MaterialIcon name="info" className="text-emerald-500 text-sm" />
-                            Challenge Objective
+                            Görev Hedefi
                         </h3>
                         <p className="text-gray-300 text-sm leading-relaxed">
-                            Write a Python script to filter the fastest bots from the incoming data stream. Optimize for speed and memory usage. Your bot must return a sorted list of IDs where <code className="bg-[#23483c] px-1 rounded">velocity &gt; 80</code>.
+                            Gelen veri akışından en hızlı botları filtrelemek için bir Python scripti yaz. Hız ve bellek kullanımı için optimize et. Botun <code className="bg-[#23483c] px-1 rounded">hız &gt; 80</code> olan ID'lerin sıralı listesini döndürmeli.
                         </p>
                         <div className="flex gap-2 mt-3">
                             <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-                                Algorithms
+                                Algoritmalar
                             </Badge>
                             <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20">
-                                Optimization
+                                Optimizasyon
                             </Badge>
                         </div>
                     </div>
@@ -192,16 +207,16 @@ if __name__ == "__main__":
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <div className="size-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-xs text-gray-400 font-mono">Ready to compile</span>
+                                <span className="text-xs text-gray-400 font-mono">Derlemeye hazır</span>
                             </div>
                             <div className="flex gap-2">
                                 <Button variant="outline" className="bg-[#23483c] border-[#23483c] hover:bg-[#23483c]/80 text-white">
                                     <MaterialIcon name="bug_report" className="mr-2 text-lg" />
-                                    Test Run
+                                    Test Çalıştır
                                 </Button>
                                 <Button className="bg-emerald-500 hover:bg-emerald-600 text-[#10221c] font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                                     <MaterialIcon name="rocket_launch" className="mr-2 text-lg" />
-                                    Deploy Bot
+                                    Botu Yayınla
                                 </Button>
                             </div>
                         </div>
@@ -224,11 +239,11 @@ if __name__ == "__main__":
                         {/* Status Overlay */}
                         <div className="absolute top-4 left-4 z-10 flex gap-2">
                             <div className="bg-black/60 backdrop-blur-md border border-emerald-500/30 text-emerald-500 px-3 py-1 rounded text-xs font-mono">
-                                LIVE FEED
+                                CANLI YAYIN
                             </div>
                             <div className="bg-black/60 backdrop-blur-md border border-red-500/30 text-red-400 px-3 py-1 rounded text-xs font-mono flex items-center gap-1">
                                 <span className="size-2 bg-red-500 rounded-full animate-pulse"></span>
-                                OPPONENT ACTIVE
+                                RAKIP AKTİF
                             </div>
                         </div>
 
@@ -255,7 +270,7 @@ if __name__ == "__main__":
                                             transition={{ duration: 1, delay: 0.5 }}
                                         />
                                     </div>
-                                    <div className="font-mono text-xs text-emerald-500">Efficiency: 92%</div>
+                                    <div className="font-mono text-xs text-emerald-500">Verimlilik: 92%</div>
                                 </motion.div>
 
                                 {/* VS Divider */}
@@ -281,7 +296,7 @@ if __name__ == "__main__":
                                             transition={{ duration: 1, delay: 0.7 }}
                                         />
                                     </div>
-                                    <div className="font-mono text-xs text-purple-400">Efficiency: 84%</div>
+                                    <div className="font-mono text-xs text-purple-400">Verimlilik: 84%</div>
                                 </motion.div>
                             </div>
                         </div>
@@ -306,13 +321,13 @@ if __name__ == "__main__":
                         <div className="flex border-b border-[#23483c] bg-[#152a24]">
                             <button className="px-6 py-3 text-sm font-bold text-white border-b-2 border-emerald-500 bg-emerald-500/5 flex items-center gap-2">
                                 <MaterialIcon name="trophy" className="text-lg" />
-                                Live Leaderboard
+                                Canlı Sıralama
                             </button>
                             <button className="px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-2">
                                 <MaterialIcon name="terminal" className="text-lg" />
-                                System Logs
+                                Sistem Logları
                                 <Badge variant="outline" className="bg-[#23483c] text-gray-300 border-none text-xs">
-                                    New
+                                    Yeni
                                 </Badge>
                             </button>
                         </div>
@@ -323,10 +338,10 @@ if __name__ == "__main__":
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-[#0d1a16] text-gray-400 text-xs uppercase tracking-wider border-b border-[#23483c]">
-                                            <th className="px-4 py-3 font-medium w-16 text-center">Rank</th>
-                                            <th className="px-4 py-3 font-medium">User</th>
-                                            <th className="px-4 py-3 font-medium text-right">Score</th>
-                                            <th className="px-4 py-3 font-medium text-center w-32">Status</th>
+                                            <th className="px-4 py-3 font-medium w-16 text-center">Sıra</th>
+                                            <th className="px-4 py-3 font-medium">Kullanıcı</th>
+                                            <th className="px-4 py-3 font-medium text-right">Skor</th>
+                                            <th className="px-4 py-3 font-medium text-center w-32">Durum</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-sm divide-y divide-[#23483c]">
@@ -348,7 +363,7 @@ if __name__ == "__main__":
                                                                 {player.name}
                                                                 {player.isYou && (
                                                                     <Badge className="bg-emerald-500 text-[#10221c] text-[10px] font-bold uppercase">
-                                                                        Leading
+                                                                        Lider
                                                                     </Badge>
                                                                 )}
                                                             </div>
@@ -357,11 +372,11 @@ if __name__ == "__main__":
                                                     </div>
                                                 </td>
                                                 <td className={`px-4 py-3 text-right font-mono ${player.isYou ? "text-emerald-500 font-bold" : "text-gray-300"}`}>
-                                                    {player.score} pts
+                                                    {player.score} puan
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <Badge variant="outline" className={`text-xs font-medium border ${getStatusColor(player.status)}`}>
-                                                        {player.status === "running" ? "Running" : player.status === "waiting" ? "Waiting" : player.status === "completed" ? "Completed" : "Failed"}
+                                                        {getStatusLabel(player.status)}
                                                     </Badge>
                                                 </td>
                                             </tr>

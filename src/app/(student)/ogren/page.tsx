@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -10,62 +10,54 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MaterialIcon } from "@/components/common/MaterialIcon";
 import { SDGBadge } from "@/components/common/SDGBadge";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
-
-// Mock curriculum data
-const phases = [
-    {
-        id: "kesif",
-        title: "Keşif",
-        subtitle: "Problem Anlama",
-        icon: "search",
-        color: "text-blue-400",
-        bgColor: "bg-blue-500/20",
-        progress: 100,
-        modules: [
-            { id: "m1", title: "SDG ve Problemler", lessons: 5, done: 5, duration: "2 saat" },
-            { id: "m2", title: "Araştırma Teknikleri", lessons: 4, done: 4, duration: "1.5 saat" },
-        ],
-    },
-    {
-        id: "insa",
-        title: "İnşa",
-        subtitle: "Çözüm Geliştirme",
-        icon: "construction",
-        color: "text-primary",
-        bgColor: "bg-primary/20",
-        progress: 35,
-        modules: [
-            { id: "m3", title: "Veri Toplama & Doğrulama", lessons: 6, done: 2, duration: "3 saat", current: true },
-            { id: "m4", title: "Prototipleme", lessons: 5, done: 0, duration: "4 saat" },
-            { id: "m5", title: "Test & İterasyon", lessons: 4, done: 0, duration: "2 saat" },
-        ],
-    },
-    {
-        id: "etki",
-        title: "Etki",
-        subtitle: "Sonuç ve Sunum",
-        icon: "campaign",
-        color: "text-purple-400",
-        bgColor: "bg-purple-500/20",
-        progress: 0,
-        modules: [
-            { id: "m6", title: "Hikaye Anlatımı", lessons: 4, done: 0, duration: "2 saat" },
-            { id: "m7", title: "Demo Hazırlığı", lessons: 3, done: 0, duration: "2 saat" },
-            { id: "m8", title: "Sunum Teknikleri", lessons: 4, done: 0, duration: "1.5 saat" },
-        ],
-    },
-];
-
-const recommendedLessons = [
-    { id: "l1", title: "Veri Görselleştirme Temelleri", duration: "15 dk", type: "video" },
-    { id: "l2", title: "Grafik Oluşturma Atölyesi", duration: "30 dk", type: "lab" },
-    { id: "l3", title: "İnfografik Tasarımı", duration: "20 dk", type: "reading" },
-];
+import { useDemo } from "@/lib/DemoContext";
+import { MICROLABS, MicroLabContent } from "@/lib/content/microlabs";
+import { cn } from "@/lib/utils";
 
 export default function OgrenPage() {
-    const [activePhase, setActivePhase] = useState("insa");
+    const { state } = useDemo();
+    const [activePhase, setActivePhase] = useState<"discovery" | "build" | "impact">("discovery");
 
-    const totalProgress = phases.reduce((acc, p) => acc + p.progress, 0) / phases.length;
+    // Filter modules by phase
+    const discoveryModules = MICROLABS.filter(m => m.phase === "discovery");
+    const buildModules = MICROLABS.filter(m => m.phase === "build");
+    const impactModules = MICROLABS.filter(m => m.phase === "impact");
+
+    // Organize modules by phase for UI
+    const phases = [
+        {
+            id: "discovery",
+            title: "Keşif",
+            subtitle: "Problem Anlama",
+            icon: "search",
+            color: "text-blue-400",
+            bgColor: "bg-blue-500/20",
+            modules: discoveryModules,
+            progress: Math.round((state.completedMicrolabs.filter(id => discoveryModules.find(m => m.id === id)).length / discoveryModules.length) * 100) || 0
+        },
+        {
+            id: "build",
+            title: "İnşa",
+            subtitle: "Çözüm Geliştirme",
+            icon: "construction",
+            color: "text-amber-400",
+            bgColor: "bg-amber-500/20",
+            modules: buildModules,
+            progress: Math.round((state.completedMicrolabs.filter(id => buildModules.find(m => m.id === id)).length / buildModules.length) * 100) || 0
+        },
+        {
+            id: "impact",
+            title: "Etki",
+            subtitle: "Sonuç ve Sunum",
+            icon: "campaign",
+            color: "text-purple-400",
+            bgColor: "bg-purple-500/20",
+            modules: impactModules,
+            progress: Math.round((state.completedMicrolabs.filter(id => impactModules.find(m => m.id === id)).length / impactModules.length) * 100) || 0
+        },
+    ];
+
+    const totalProgress = Math.round((state.completedMicrolabs.length / MICROLABS.length) * 100);
 
     return (
         <div className="min-h-screen bg-gradient-hero p-4 md:p-6">
@@ -86,10 +78,10 @@ export default function OgrenPage() {
                     <div className="flex items-center gap-4">
                         <div className="text-right">
                             <div className="text-sm text-muted-foreground">Toplam İlerleme</div>
-                            <div className="text-2xl font-bold text-primary">{Math.round(totalProgress)}%</div>
+                            <div className="text-2xl font-bold text-emerald-400">{totalProgress}%</div>
                         </div>
-                        <div className="h-12 w-12">
-                            <svg viewBox="0 0 36 36" className="rotate-[-90deg]">
+                        <div className="relative h-12 w-12">
+                            <svg viewBox="0 0 36 36" className="rotate-[-90deg] h-full w-full">
                                 <path
                                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                     fill="none"
@@ -103,7 +95,7 @@ export default function OgrenPage() {
                                     stroke="currentColor"
                                     strokeWidth="3"
                                     strokeDasharray={`${totalProgress}, 100`}
-                                    className="text-primary"
+                                    className="text-emerald-400 transition-all duration-1000 ease-out"
                                 />
                             </svg>
                         </div>
@@ -112,19 +104,19 @@ export default function OgrenPage() {
             </header>
 
             {/* Phase Tabs */}
-            <Tabs value={activePhase} onValueChange={setActivePhase} className="mb-6">
+            <Tabs value={activePhase} onValueChange={(v) => setActivePhase(v as any)} className="mb-6">
                 <TabsList className="grid w-full grid-cols-3 bg-card/50">
                     {phases.map((phase) => (
                         <TabsTrigger
                             key={phase.id}
                             value={phase.id}
-                            className="flex items-center gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-foreground"
+                            className="flex items-center gap-2 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground"
                         >
                             <MaterialIcon name={phase.icon} size="sm" className={phase.color} />
                             <span className="hidden sm:inline">{phase.title}</span>
                             <span className="sm:hidden">{phase.title.slice(0, 3)}</span>
                             {phase.progress === 100 && (
-                                <MaterialIcon name="check_circle" size="sm" className="text-primary" />
+                                <MaterialIcon name="check_circle" size="sm" className="text-emerald-400" />
                             )}
                         </TabsTrigger>
                     ))}
@@ -158,124 +150,114 @@ export default function OgrenPage() {
                                 </Card>
 
                                 {/* Module Cards */}
-                                {phase.modules.map((module, idx) => (
-                                    <Card
-                                        key={module.id}
-                                        className={`border-border bg-card/80 backdrop-blur transition-all ${module.current ? "ring-2 ring-primary glow-green" : ""
-                                            } ${module.done === module.lessons ? "opacity-60" : ""}`}
-                                    >
-                                        <CardContent className="p-4">
-                                            <div className="flex items-start justify-between gap-4">
-                                                <div className="flex items-start gap-4">
-                                                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${module.done === module.lessons
-                                                            ? "bg-primary/20 text-primary"
-                                                            : module.current
-                                                                ? "bg-primary text-black"
-                                                                : "bg-secondary text-muted-foreground"
-                                                        }`}>
-                                                        {module.done === module.lessons ? (
-                                                            <MaterialIcon name="check_circle" />
-                                                        ) : module.current ? (
-                                                            <MaterialIcon name="play_arrow" />
-                                                        ) : (
-                                                            <span className="font-bold">{idx + 1}</span>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-foreground">{module.title}</h3>
-                                                        <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
-                                                            <span className="flex items-center gap-1">
-                                                                <MaterialIcon name="menu_book" size="sm" />
-                                                                {module.done}/{module.lessons} ders
-                                                            </span>
-                                                            <span className="flex items-center gap-1">
-                                                                <MaterialIcon name="schedule" size="sm" />
-                                                                {module.duration}
-                                                            </span>
+                                {phase.modules.map((module, idx) => {
+                                    const isCompleted = state.completedMicrolabs.includes(module.id);
+                                    // Logic for 'current': First incomplete module in the phase
+                                    // If all completed, last one is technically done but let's keep it accessible
+                                    const firstIncompleteIdx = phase.modules.findIndex(m => !state.completedMicrolabs.includes(m.id));
+
+                                    // If all are complete, firstIncompleteIdx is -1.
+                                    // Then isCurrent shouldn't match any idx if we strictly follow "next one is current"
+                                    // BUT, we might want to highlight something? 
+                                    // Let's say if all complete, nothing is "current" in the sense of "next to do", 
+                                    // or maybe the last one is just "done".
+
+                                    const isCurrent = (firstIncompleteIdx !== -1 && idx === firstIncompleteIdx);
+
+                                    // Lock logic: 
+                                    // If it's incomplete AND it's NOT the current one (meaning it's further down the list), it's locked.
+                                    // BUT, we should only look at "first incomplete". 
+                                    // So if I am at index 2, and index 0 is incomplete, index 2 is locked.
+                                    // if index 0 is complete, index 1 is incomplete (current), index 2 is locked.
+                                    const isLocked = !isCompleted && !isCurrent;
+
+                                    return (
+                                        <Card
+                                            key={module.id}
+                                            className={cn(
+                                                "border-border bg-card/80 backdrop-blur transition-all",
+                                                isCurrent && "ring-1 ring-emerald-500/50 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]",
+                                                isLocked && "opacity-50 grayscale"
+                                            )}
+                                        >
+                                            <CardContent className="p-4">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex items-start gap-4">
+                                                        <div className={cn(
+                                                            "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
+                                                            isCompleted ? "bg-emerald-500/20 text-emerald-400" :
+                                                                isCurrent ? "bg-emerald-500 text-black" :
+                                                                    "bg-secondary text-muted-foreground"
+                                                        )}>
+                                                            {isCompleted ? (
+                                                                <MaterialIcon name="check_circle" />
+                                                            ) : isLocked ? (
+                                                                <MaterialIcon name="lock" />
+                                                            ) : (
+                                                                <span className="font-bold">{idx + 1}</span>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-semibold text-foreground">{module.title}</h3>
+                                                            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">{module.description}</p>
+                                                            <div className="mt-2 flex items-center gap-3 text-sm text-muted-foreground">
+                                                                <span className="flex items-center gap-1">
+                                                                    <MaterialIcon name="schedule" size="sm" />
+                                                                    {module.duration}
+                                                                </span>
+                                                                <Badge variant="outline" className="text-xs border-white/10">
+                                                                    {module.xp} XP
+                                                                </Badge>
+                                                                {module.tags?.slice(0, 1).map(tag => (
+                                                                    <Badge key={tag} variant="secondary" className="text-xs bg-secondary/50 text-muted-foreground">
+                                                                        {tag}
+                                                                    </Badge>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <Link href={`/microlab/${module.id}`}>
-                                                    <Button
-                                                        size="sm"
-                                                        className={
-                                                            module.current
-                                                                ? "bg-primary text-black hover:bg-primary/90"
-                                                                : module.done === module.lessons
-                                                                    ? "bg-secondary text-muted-foreground"
-                                                                    : "bg-secondary text-foreground hover:bg-secondary/80"
-                                                        }
-                                                    >
-                                                        {module.current ? "Devam Et" : module.done === module.lessons ? "Tekrar" : "Başla"}
-                                                        <MaterialIcon name="chevron_right" size="sm" className="ml-1" />
-                                                    </Button>
-                                                </Link>
-                                            </div>
-
-                                            {/* Progress for current module */}
-                                            {module.current && (
-                                                <div className="mt-4">
-                                                    <Progress value={(module.done / module.lessons) * 100} className="h-1.5 bg-secondary" />
+                                                    <Link href={`/microlab/${module.id}`} className={cn(isLocked && "pointer-events-none")}>
+                                                        <Button
+                                                            size="sm"
+                                                            disabled={isLocked}
+                                                            className={cn(
+                                                                isCurrent
+                                                                    ? "bg-emerald-500 text-black hover:bg-emerald-400"
+                                                                    : isCompleted
+                                                                        ? "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                                                                        : "bg-secondary text-foreground hover:bg-secondary/80"
+                                                            )}
+                                                        >
+                                                            {isCurrent ? "Başla" : isCompleted ? "Tekrar" : "Kilitli"}
+                                                            {!isLocked && <MaterialIcon name="chevron_right" size="sm" className="ml-1" />}
+                                                        </Button>
+                                                    </Link>
                                                 </div>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
                             </div>
                         ))}
                 </div>
 
                 {/* Right Sidebar - 1/3 */}
                 <div className="space-y-6">
-                    {/* SDG Connection */}
+                    {/* SDG Connection - Dynamic from state/scenario */}
                     <Card className="border-border bg-card/80 backdrop-blur">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center gap-2 text-lg">
-                                <MaterialIcon name="public" className="text-chart-2" />
+                                <MaterialIcon name="public" className="text-blue-400" />
                                 SDG Bağlantısı
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <SDGBadge sdg={13} variant="large" showName />
-                            <p className="mt-3 text-sm text-muted-foreground">
-                                Bu eğitim programı BM Sürdürülebilir Kalkınma Hedefi 13: İklim Eylemi ile ilişkilidir.
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    {/* Recommended Next */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <MaterialIcon name="lightbulb" className="text-chart-4" />
-                                Önerilen Dersler
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {recommendedLessons.map((lesson) => (
-                                    <Link key={lesson.id} href={`/microlab/${lesson.id}`}>
-                                        <div className="group flex items-center gap-3 rounded-lg bg-secondary/30 p-3 transition-all hover:bg-secondary/50">
-                                            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${lesson.type === "video" ? "bg-red-500/20 text-red-400" :
-                                                    lesson.type === "lab" ? "bg-green-500/20 text-green-400" :
-                                                        "bg-blue-500/20 text-blue-400"
-                                                }`}>
-                                                <MaterialIcon
-                                                    name={lesson.type === "video" ? "play_circle" : lesson.type === "lab" ? "science" : "menu_book"}
-                                                    size="sm"
-                                                />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="truncate text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                                                    {lesson.title}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">{lesson.duration}</p>
-                                            </div>
-                                            <MaterialIcon name="chevron_right" size="sm" className="text-muted-foreground group-hover:text-primary transition-colors" />
-                                        </div>
-                                    </Link>
-                                ))}
+                            <div className="flex flex-col items-center">
+                                <SDGBadge sdg={state.sdg || 4} variant="large" showName className="w-full justify-center" />
+                                <p className="mt-3 text-center text-sm text-muted-foreground">
+                                    Müfredatın, seçtiğin bu Sürdürülebilir Kalkınma Hedefi ile uyumlu projeler içeriyor.
+                                </p>
                             </div>
                         </CardContent>
                     </Card>
@@ -294,6 +276,12 @@ export default function OgrenPage() {
                                     <Button variant="outline" className="w-full justify-start border-border hover:border-primary">
                                         <MaterialIcon name="science" size="sm" className="mr-2 text-chart-3" />
                                         Simülasyona Git
+                                    </Button>
+                                </Link>
+                                <Link href="/gorevler">
+                                    <Button variant="outline" className="w-full justify-start border-border hover:border-primary">
+                                        <MaterialIcon name="assignment" size="sm" className="mr-2 text-chart-4" />
+                                        Görevler
                                     </Button>
                                 </Link>
                             </div>

@@ -26,6 +26,7 @@ const MAIN_NAV_TEMPLATE: NavItem[] = [
     { label: "Sıralama", href: "/liderlik", icon: "trophy" },
     { label: "Buddy", href: "/buddy", icon: "people" },
     { label: "Pazar", href: "/pazar", icon: "shopping_bag" },
+    { label: "Etkileşimli Öğrenme", href: "/etkilesim/degiskenler", icon: "code" },
     { label: "Bildirimler", href: "/bildirimler", icon: "notifications" },
     { label: "Profil", href: "/profil", icon: "person" },
     { label: "Ayarlar", href: "/ayarlar", icon: "settings" },
@@ -38,7 +39,8 @@ interface SidebarMobileSheetProps {
 export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps) {
     const [open, setOpen] = useState(false);
     const pathname = usePathname();
-    const { currentUser } = useDemo();
+    const { state } = useDemo();
+    const currentUser = state;
 
     const isActive = (href: string) => {
         if (href === "/panel") return pathname === "/panel";
@@ -46,8 +48,8 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
     };
 
     const mainNav = MAIN_NAV_TEMPLATE.map(item => {
-        if (item.label === "Bildirimler" && currentUser.notifications > 0) {
-            return { ...item, badge: currentUser.notifications };
+        if (item.label === "Bildirimler" && (currentUser?.notifications?.length || 0) > 0) {
+            return { ...item, badge: currentUser.notifications.length };
         }
         return item;
     });
@@ -136,9 +138,9 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
                     <Link href="/bildirimler">
                         <Button variant="ghost" size="icon" className="relative text-muted-foreground">
                             <MaterialIcon name="notifications" />
-                            {currentUser.notifications > 0 && (
+                            {(currentUser?.notifications?.length || 0) > 0 && (
                                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
-                                    {currentUser.notifications}
+                                    {currentUser.notifications.length}
                                 </span>
                             )}
                         </Button>

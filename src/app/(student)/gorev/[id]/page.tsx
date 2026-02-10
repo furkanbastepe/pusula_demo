@@ -1,260 +1,177 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { MaterialIcon } from "@/components/common/MaterialIcon";
-import { SDGBadge } from "@/components/common/SDGBadge";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { toast } from "sonner";
-
-// Mock task data
-const mockTask = {
-    id: "t1",
-    title: "3 Dakikalık Mikro Sunum",
-    description: "Seçtiğin SDG hakkında 3 dakikalık bir video sunum hazırla. Net konuş, görseller kullan.",
-    sdg: 13,
-    xp: 50,
-    type: "sunum",
-    phase: "İnşa",
-    difficulty: "medium",
-    steps: [
-        { id: "s1", title: "Konu seç", completed: true },
-        { id: "s2", title: "Taslak hazırla", completed: true },
-        { id: "s3", title: "Sunumu kaydet", completed: false },
-        { id: "s4", title: "Yükle ve gönder", completed: false },
-    ],
-    rubric: [
-        { id: "r1", label: "İçerik net ve anlaşılır", points: 10 },
-        { id: "r2", label: "Görsel destek kullanılmış", points: 10 },
-        { id: "r3", label: "3 dakika sınırına uyulmuş", points: 10 },
-        { id: "r4", label: "Konu hakkında bilgi verilmiş", points: 10 },
-        { id: "r5", label: "Özgün yaklaşım", points: 10 },
-    ],
-    deadline: "15 Şubat 2025",
-    estimatedTime: "60 dk",
-};
+import confetti from "canvas-confetti";
+import { useDemo } from "@/lib/DemoContext";
+import { TASKS, TaskContent } from "@/lib/content/tasks";
+import { cn } from "@/lib/utils";
 
 export default function TaskDetailPage() {
-    const params = useParams();
     const router = useRouter();
+    const params = useParams();
+    const { state, dispatch } = useDemo();
     const taskId = params.id as string;
 
-    const [task] = useState(mockTask);
-    const [notes, setNotes] = useState("");
-    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-    const [submitting, setSubmitting] = useState(false);
+    const [task, setTask] = useState<TaskContent | null>(null);
+    const [submissionType, setSubmissionType] = useState<"text" | "file" | "link">("text"); // default fallback
+    const [submissionContent, setSubmissionContent] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const completedSteps = task.steps.filter((s) => s.completed).length;
-    const progress = (completedSteps / task.steps.length) * 100;
-    const maxPoints = task.rubric.reduce((acc, r) => acc + r.points, 0);
+    useEffect(() => {
+        const found = TASKS.find(t => t.id === taskId);
+        if (!found) {
+            toast.error("Görev bulunamadı");
+            router.push("/gorevler");
+            return;
+        }
+        setTask(found);
+        setSubmissionType(found.deliverableType);
+    }, [taskId, router]);
+
+    if (!task) return null;
+
+    const isCompleted = state.completedTasks.includes(taskId);
 
     const handleSubmit = async () => {
-        if (!uploadedFile) {
-            toast.error("Lütfen bir dosya yükle");
+        if (!submissionContent.trim() && submissionType !== "file") {
+            toast.error("Lütfen içeriği doldurunuz.");
             return;
         }
 
-        setSubmitting(true);
-        try {
-            // In real app, upload file and create submission
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            toast.success("Görev gönderildi! 🎉");
-            router.push("/gorevler");
-        } catch (error) {
-            toast.error("Gönderim başarısız");
-        } finally {
-            setSubmitting(false);
-        }
+        setIsSubmitting(true);
+
+        // Fake API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        dispatch({
+            type: "SUBMIT_TASK",
+            payload: {
+                id: task.id,
+                xp: task.xp
+            }
+        });
+
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+        const interval: any = setInterval(function () {
+            const timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            const particleCount = 50 * (timeLeft / duration);
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+
+        toast.success("Görev başarıyla teslim edildi!");
+        setIsSubmitting(false);
+        setTimeout(() => router.push("/gorevler"), 2000);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-hero p-4 md:p-6">
-            {/* Header */}
-            <header className="mb-6">
-                <Breadcrumb />
-            </header>
+        <div className="min-h-screen bg-gradient-hero p-4 md:p-8 flex justify-center">
+            <Card className="w-full max-w-3xl border-border bg-card/90 backdrop-blur shadow-2xl">
+                <CardHeader className="border-b border-border/50 pb-6">
+                    <div className="flex items-center justify-between">
+                        <Link href="/gorevler">
+                            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                                <MaterialIcon name="arrow_back" className="mr-2" size="sm" />
+                                Görevlere Dön
+                            </Button>
+                        </Link>
+                        <Badge variant="outline" className="text-xs uppercase tracking-wider">{task.difficulty} Seviye</Badge>
+                    </div>
+                    <CardTitle className="text-3xl font-display font-bold mt-4">{task.title}</CardTitle>
+                    <CardDescription className="text-lg mt-2 flex items-center gap-2">
+                        <MaterialIcon name="schedule" size="sm" /> Son teslim: {task.deadline}
+                    </CardDescription>
+                </CardHeader>
 
-            <div className="grid gap-6 lg:grid-cols-3">
-                {/* Main Content */}
-                <div className="space-y-6 lg:col-span-2">
-                    {/* Task Header */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardContent className="p-6">
-                            <div className="flex flex-wrap items-start gap-3 mb-4">
-                                <SDGBadge sdg={task.sdg} variant="medium" />
-                                <Badge className="bg-chart-4/20 text-chart-4 border-0">{task.phase}</Badge>
-                                <Badge className="bg-blue-500/20 text-blue-400 border-0">{task.type}</Badge>
-                            </div>
-
-                            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
-                                {task.title}
-                            </h1>
-                            <p className="text-muted-foreground mb-4">{task.description}</p>
-
-                            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                    <MaterialIcon name="star" size="sm" className="text-primary" />
-                                    {task.xp} XP
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <MaterialIcon name="schedule" size="sm" />
-                                    {task.estimatedTime}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <MaterialIcon name="event" size="sm" />
-                                    Son: {task.deadline}
-                                </span>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Progress Steps */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-lg text-foreground flex items-center gap-2">
-                                <MaterialIcon name="checklist" className="text-chart-2" />
-                                Adımlar
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {task.steps.map((step, idx) => (
-                                <div
-                                    key={step.id}
-                                    className={`flex items-center gap-3 rounded-lg border p-3 ${step.completed
-                                        ? "border-primary/30 bg-primary/10"
-                                        : "border-border bg-secondary/30"
-                                        }`}
-                                >
-                                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step.completed ? "bg-primary text-black" : "bg-secondary text-muted-foreground"
-                                        }`}>
-                                        {step.completed ? (
-                                            <MaterialIcon name="check" size="sm" />
-                                        ) : (
-                                            <span className="text-sm">{idx + 1}</span>
-                                        )}
-                                    </div>
-                                    <span className={step.completed ? "text-foreground" : "text-muted-foreground"}>
-                                        {step.title}
-                                    </span>
-                                </div>
-                            ))}
-                            <div className="pt-2">
-                                <Progress value={progress} className="h-2 bg-secondary" />
-                                <p className="mt-1 text-sm text-muted-foreground text-center">
-                                    {completedSteps} / {task.steps.length} tamamlandı
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Submission */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-lg text-foreground flex items-center gap-2">
-                                <MaterialIcon name="upload_file" className="text-blue-400" />
-                                Teslim
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {/* File Upload */}
-                            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-secondary/30 p-6 transition-all hover:border-primary hover:bg-secondary/50">
-                                <input
-                                    type="file"
-                                    accept="video/*,image/*,.pdf"
-                                    onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
-                                    className="hidden"
-                                />
-                                {uploadedFile ? (
-                                    <div className="text-center">
-                                        <MaterialIcon name="check_circle" size="lg" className="text-primary mb-2" />
-                                        <p className="font-medium text-foreground">{uploadedFile.name}</p>
-                                        <p className="text-sm text-muted-foreground">Değiştirmek için tıkla</p>
-                                    </div>
-                                ) : (
-                                    <div className="text-center">
-                                        <MaterialIcon name="cloud_upload" size="lg" className="text-muted-foreground mb-2" />
-                                        <p className="font-medium text-foreground">Dosya yükle</p>
-                                        <p className="text-sm text-muted-foreground">Video, resim veya PDF</p>
-                                    </div>
-                                )}
-                            </label>
-
-                            {/* Notes */}
+                <CardContent className="p-6 md:p-8 space-y-8">
+                    {/* Scenario Context */}
+                    <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 text-primary-foreground dark:text-primary">
+                        <div className="flex gap-3">
+                            <MaterialIcon name="tips_and_updates" size="md" />
                             <div>
-                                <label className="text-sm text-muted-foreground mb-2 block">
-                                    Notlar (opsiyonel)
-                                </label>
-                                <Textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Eklemek istediğin bir not var mı?"
-                                    className="border-border bg-secondary text-foreground min-h-[80px]"
-                                />
+                                <h4 className="font-bold text-sm uppercase mb-1">Bağlam</h4>
+                                <p>{task.scenarioContext}</p>
                             </div>
+                        </div>
+                    </div>
 
-                            <Button
-                                onClick={handleSubmit}
-                                disabled={!uploadedFile || submitting}
-                                className="w-full bg-primary text-black hover:bg-primary/90"
-                            >
-                                {submitting ? (
-                                    <MaterialIcon name="progress_activity" size="sm" className="mr-2 animate-spin" />
-                                ) : (
-                                    <MaterialIcon name="send" size="sm" className="mr-2" />
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold flex items-center gap-2">
+                            <MaterialIcon name="description" /> Görev Tanımı
+                        </h3>
+                        <p className="text-muted-foreground leading-relaxed text-lg">{task.description}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold flex items-center gap-2">
+                            <MaterialIcon name="upload_file" /> {isCompleted ? "Teslim Durumu" : "Teslim"}
+                        </h3>
+
+                        {isCompleted ? (
+                            <div className="p-8 border-2 border-emerald-500/20 bg-emerald-500/5 rounded-2xl text-center">
+                                <MaterialIcon name="check_circle" size="xl" className="text-emerald-500 mb-4 scale-150" />
+                                <h4 className="text-xl font-bold text-emerald-500">Görev Tamamlandı!</h4>
+                                <p className="text-muted-foreground mt-2">Puanın hesabına eklendi.</p>
+                                <Button className="mt-6" variant="outline" onClick={() => router.push("/gorevler")}>Listeye Dön</Button>
+                            </div>
+                        ) : (
+                            <div className="p-6 border border-border bg-secondary/20 rounded-xl space-y-4">
+                                {task.deliverableType === "text" && (
+                                    <textarea
+                                        className="w-full min-h-[150px] p-4 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                                        placeholder="Yanıtını buraya yaz..."
+                                        value={submissionContent}
+                                        onChange={(e) => setSubmissionContent(e.target.value)}
+                                    />
                                 )}
-                                Gönder
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
+                                {task.deliverableType === "link" && (
+                                    <input
+                                        type="url"
+                                        className="w-full p-4 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                                        placeholder="https://..."
+                                        value={submissionContent}
+                                        onChange={(e) => setSubmissionContent(e.target.value)}
+                                    />
+                                )}
+                                {task.deliverableType === "file" && (
+                                    <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-secondary/50 cursor-pointer transition-colors">
+                                        <MaterialIcon name="cloud_upload" size="xl" className="text-muted-foreground mb-2" />
+                                        <p>Dosya yüklemek için tıkla veya sürükle</p>
+                                        <input type="file" className="hidden" onChange={(e) => setSubmissionContent(e.target.value)} />
+                                    </div>
+                                )}
 
-                {/* Sidebar */}
-                <div className="space-y-6">
-                    {/* Rubric */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-base text-foreground flex items-center gap-2">
-                                <MaterialIcon name="grading" size="sm" className="text-chart-4" />
-                                Değerlendirme Kriterleri
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {task.rubric.map((r) => (
-                                <div key={r.id} className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">{r.label}</span>
-                                    <span className="text-foreground font-medium">{r.points} puan</span>
-                                </div>
-                            ))}
-                            <div className="border-t border-border pt-2 mt-2 flex items-center justify-between">
-                                <span className="font-medium text-foreground">Toplam</span>
-                                <span className="font-bold text-primary">{maxPoints} puan</span>
+                                <Button
+                                    className="w-full h-12 text-lg font-bold shadow-lg shadow-primary/20"
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <span className="flex items-center gap-2">
+                                            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                                            Gönderiliyor...
+                                        </span>
+                                    ) : (
+                                        `Görevi Teslim Et (+${task.xp} XP)`
+                                    )}
+                                </Button>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Help */}
-                    <Card className="border-border bg-card/80 backdrop-blur">
-                        <CardContent className="p-4">
-                            <Button variant="outline" className="w-full border-border mb-2">
-                                <MaterialIcon name="smart_toy" size="sm" className="mr-2 text-purple-400" />
-                                AI Mentor'a Sor
-                            </Button>
-                            <Button variant="outline" className="w-full border-border">
-                                <MaterialIcon name="help" size="sm" className="mr-2 text-blue-400" />
-                                Yardım Al
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

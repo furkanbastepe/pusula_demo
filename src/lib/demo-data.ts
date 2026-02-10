@@ -1,5 +1,6 @@
 import { UserRole, Level } from "@/types/database";
 import { FeedItem } from "@/components/panel/QuickFeed";
+import { mockDataEngine, getCurrentUser, getDemoUser } from "@/lib/mock-data";
 
 export type DemoStage =
     | "onboarding"
@@ -67,6 +68,7 @@ export interface DemoUser {
     }[];
 }
 
+// Enhanced demo stages with mock data integration
 export const DEMO_STAGES: Record<DemoStage, {
     label: string;
     user: DemoUser;
