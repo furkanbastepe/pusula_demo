@@ -88,7 +88,8 @@ const stats = {
 import { useDemo } from "@/lib/DemoContext";
 
 export default function PortfolyoPage() {
-    const { currentUser } = useDemo();
+    const { state } = useDemo();
+    const currentUser = state;
     const [filter, setFilter] = useState<"all" | "projects" | "artifacts">("all");
 
     // Update stats with real user data

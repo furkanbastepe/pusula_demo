@@ -48,7 +48,7 @@ export default function RehberPage() {
             task: "Aktif Görev", // Dynamic based on state could be better but simplified
             progress: 75,
             isUser: true
-        },
+        } as MockStudent,
         ...students
     ].sort((a, b) => b.xp - a.xp);
 
@@ -144,8 +144,8 @@ export default function RehberPage() {
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         className={`p-4 rounded-xl border transition-all ${student.isUser
-                                                ? "bg-primary/5 border-primary/50 shadow-lg shadow-primary/5"
-                                                : "bg-secondary/20 border-border hover:bg-secondary/40"
+                                            ? "bg-primary/5 border-primary/50 shadow-lg shadow-primary/5"
+                                            : "bg-secondary/20 border-border hover:bg-secondary/40"
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-3">

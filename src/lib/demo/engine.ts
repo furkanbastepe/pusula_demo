@@ -110,6 +110,42 @@ export class DemoEngine {
                     });
                 }
                 break;
+
+            case "MANUAL_LEVEL_UP":
+                this.state.level = action.payload.level as any;
+                this.addNotification({
+                    title: "Seviye Atladın!",
+                    message: `${action.payload.level.toUpperCase()} seviyesine yükseldin.`,
+                    type: "success"
+                });
+                break;
+
+            case "JUMP_TO_STAGE":
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const { DEMO_STAGES } = require("../demo-data");
+                const stageData = DEMO_STAGES[action.payload.stage];
+                if (stageData) {
+                    const u = stageData.user;
+                    this.state = {
+                        ...this.state,
+                        name: u.name,
+                        role: u.role,
+                        level: u.level,
+                        xp: u.xp,
+                        streak: u.streak,
+                        cohort: u.cohort,
+                        sdg: u.sdg,
+                        gdrScore: u.gdrScore,
+                        gdrComponents: u.gdrComponents,
+                        // Update phase based on level/stage if needed, or mapping
+                    };
+
+                    // Simple phase mapping
+                    if (action.payload.stage === "onboarding") this.state.phase = "onboarding";
+                    else if (action.payload.stage === "graduation") this.state.phase = "graduation";
+                    // else keep current or refine logic
+                }
+                break;
         }
 
         this.checkLevelUp(previousState.xp);

@@ -84,7 +84,8 @@ export default function GatePage() {
     const router = useRouter();
     const level = params.level as string;
 
-    const { currentUser, setStage, nextStage } = useDemo();
+    const { state, dispatch } = useDemo();
+    const currentUser = state;
     const [gate, setGate] = useState<GateData | null>(null);
     const [loading, setLoading] = useState(true);
     const [advancing, setAdvancing] = useState(false);
@@ -135,7 +136,7 @@ export default function GatePage() {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         // Advance stage in demo
-        nextStage();
+        dispatch({ type: "MANUAL_LEVEL_UP", payload: { level: gate.nextLevel } });
 
         // Confetti celebration!
         confetti({

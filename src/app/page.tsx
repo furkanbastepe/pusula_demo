@@ -140,24 +140,15 @@ export default function HomePage() {
         >
           {/* Main Title */}
           <h1 className="font-display font-black text-6xl md:text-8xl tracking-tighter text-white leading-[0.9] drop-shadow-2xl">
-            ZEYNEP'İN <br />
+            GELECEĞİNE <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-emerald-500 to-white">
-              HİKAYESİ
+              YÖN VER
             </span>
           </h1>
 
-          {/* Impact Ticker */}
-          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-sm font-medium text-emerald-400">Canlı: Şu an DiGEM'de 28 öğrenci kodluyor</span>
-          </div>
-
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-slate-300 max-w-2xl mt-4 font-light leading-relaxed">
-            Meteoroloji Mühendisliğinden Veri Bilimciliğine uzanan 12 haftalık gerçek bir dönüşüm hikayesi.
+            DİGEM'in kalbinde, teknoloji ve inovasyonla harmanlanmış yeni nesil hibrit eğitim deneyimi.
           </p>
 
           {/* Scroll Indicator */}

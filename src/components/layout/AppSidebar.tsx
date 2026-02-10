@@ -19,6 +19,7 @@ const MAIN_NAV: NavItem[] = [
     { label: "Müfredat", href: "/ogren", icon: "menu_book" },
     { label: "Görevler", href: "/gorevler", icon: "checklist" },
     { label: "Etkinlikler", href: "/etkinlikler", icon: "celebration" },
+    { label: "Etkileşimli Öğrenme", href: "/etkilesim/degiskenler", icon: "code" },
     { label: "Çalışma Alanı", href: "/calisma", icon: "folder_open" },
     { label: "Simülasyon", href: "/simulasyon", icon: "science" },
     { label: "Harita", href: "/harita", icon: "map" },
@@ -29,7 +30,6 @@ const SECONDARY_NAV_TEMPLATE: NavItem[] = [
     { label: "AI Mentor", href: "/mentor", icon: "smart_toy" },
     { label: "Buddy", href: "/buddy", icon: "people" },
     { label: "Pazar", href: "/pazar", icon: "shopping_bag" },
-    { label: "Etkileşimli Öğrenme", href: "/etkilesim/degiskenler", icon: "code" },
     { label: "Bildirimler", href: "/bildirimler", icon: "notifications" },
 ];
 

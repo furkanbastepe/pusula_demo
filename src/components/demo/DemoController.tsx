@@ -8,12 +8,38 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function DemoController() {
-    const { currentStage, setStage, nextStage, prevStage, currentUser } = useDemo();
+    const { state, dispatch } = useDemo();
+    const currentUser = state;
     const [isOpen, setIsOpen] = useState(true);
 
     const stages = Object.keys(DEMO_STAGES) as DemoStage[];
+
+    // Map current state to a demo stage key
+    const getStageFromState = (): DemoStage => {
+        if (state.level === "graduate") return "graduation";
+        if (state.level === "usta") return "dashboard-advanced";
+        if (state.level === "kalfa") return "bot-arena";
+        if (state.level === "cirak") return "learning-module";
+        return "onboarding";
+    };
+
+    const currentStage = getStageFromState();
     const currentIndex = stages.indexOf(currentStage);
     const progress = ((currentIndex + 1) / stages.length) * 100;
+
+    const setStage = (stage: DemoStage) => {
+        dispatch({ type: "JUMP_TO_STAGE", payload: { stage } });
+    };
+
+    const nextStage = () => {
+        const nextIndex = Math.min(currentIndex + 1, stages.length - 1);
+        setStage(stages[nextIndex]);
+    };
+
+    const prevStage = () => {
+        const prevIndex = Math.max(currentIndex - 1, 0);
+        setStage(stages[prevIndex]);
+    };
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
@@ -44,10 +70,10 @@ export function DemoController() {
                                     Aktif Sahne:
                                 </p>
                                 <p className="font-semibold text-foreground">
-                                    {DEMO_STAGES[currentStage].label}
+                                    {DEMO_STAGES[currentStage]?.label || "Sahne Yükleniyor..."}
                                 </p>
                                 <p className="text-xs text-muted-foreground italic">
-                                    "{DEMO_STAGES[currentStage].context}"
+                                    "{DEMO_STAGES[currentStage]?.context || "..."}"
                                 </p>
                             </div>
 

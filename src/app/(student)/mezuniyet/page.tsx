@@ -16,7 +16,7 @@ export default function MezuniyetPage() {
     const router = useRouter();
     const [showCertificate, setShowCertificate] = useState(false);
 
-    const isGraduated = state.phase === "mezuniyet" || state.xp > 3000; // Mock condition
+    const isGraduated = state.phase === "graduation" || state.xp > 3000; // Mock condition
 
     useEffect(() => {
         if (isGraduated) {

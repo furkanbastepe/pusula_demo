@@ -75,9 +75,28 @@ const certificates = [
 ];
 
 export default function ProfilPage() {
-    const { currentUser, currentStage } = useDemo();
+    const { state } = useDemo();
+    const currentUser = state;
+
+    // Map current state to a demo stage key
+    const getStageFromState = (): keyof typeof DEMO_STAGES => {
+        if (state.level === "graduate") return "graduation";
+        if (state.level === "usta") return "dashboard-advanced";
+        if (state.level === "kalfa") return "bot-arena";
+        if (state.level === "cirak") return "learning-module";
+        return "onboarding";
+    };
+
+    const currentStage = getStageFromState();
     const { dashboardData } = DEMO_STAGES[currentStage];
     const [activeTab, setActiveTab] = useState("genel");
+
+    const getXpToNext = () => {
+        if (currentUser.level === "cirak") return 1000;
+        if (currentUser.level === "kalfa") return 2500;
+        if (currentUser.level === "usta") return 5000;
+        return 5000;
+    };
 
     // Merge dynamic user data with static profile data for Merve
     const profileUser = {
@@ -85,7 +104,7 @@ export default function ProfilPage() {
         name: currentUser.name,
         level: currentUser.level,
         xp: currentUser.xp,
-        xpToNext: currentUser.xpToNext,
+        xpToNext: getXpToNext(),
         streak: currentUser.streak,
         // Use GDR score from current user
         gdrScore: currentUser.gdrScore,

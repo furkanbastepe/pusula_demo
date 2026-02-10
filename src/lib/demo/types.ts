@@ -79,4 +79,6 @@ export type DemoAction =
     | { type: "ATTEND_EVENT"; payload: { id: string; xp: number } }
     | { type: "ADVANCE_PHASE"; payload: { phase: JourneyPhase } }
     | { type: "START_SIMULATION"; payload: { id: string } }
-    | { type: "COMPLETE_SIMULATION"; payload: { id: string; score: number; xp: number } };
+    | { type: "COMPLETE_SIMULATION"; payload: { id: string; score: number; xp: number } }
+    | { type: "MANUAL_LEVEL_UP"; payload: { level: string } }
+    | { type: "JUMP_TO_STAGE"; payload: { stage: string } };
