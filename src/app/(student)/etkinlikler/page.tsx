@@ -9,18 +9,70 @@ import { Breadcrumb } from "@/components/layout/Breadcrumb";
 
 const activities = [
     {
-        id: "bot-arena",
-        title: "🤖 Oyun Botu Yapma Yarışması",
-        description:
-            "Python veya JavaScript ile yapay zeka destekli oyun botu geliştir! Diğer öğrencilerin botlarıyla yarış, algoritma optimizasyonu yap ve liderlik tablosunda zirveye çık.",
-        icon: "smart_toy",
-        status: "live",
-        participants: 24,
-        reward: 500,
-        daysLeft: 3,
-        tags: ["Algorithms", "Optimization", "Python"],
-        difficulty: "medium",
+        id: "workshop-1",
+        title: "🐍 Python ile Veri Analizi Atölyesi",
+        description: "Pandas ve NumPy kütüphanelerini kullanarak gerçek hayat verilerini analiz etmeyi öğrenin. Başlangıç seviyesi için uygundur.",
+        icon: "analytics",
+        status: "open",
+        participants: 12,
+        reward: 300,
+        daysLeft: 2,
+        tags: ["Python", "Veri Bilimi", "Yüzyüze"],
+        difficulty: "Kolay",
+        minLevel: "cirak"
     },
+    {
+        id: "workshop-2",
+        title: "🤖 Robotik Kodlama: Arduino",
+        description: "Sensörler ve motorlarla kendi robotunu tasarla. Temel elektronik bilgisi gerektirir.",
+        icon: "smart_toy",
+        status: "full",
+        participants: 20,
+        reward: 500,
+        daysLeft: 5,
+        tags: ["Donanım", "C++", "Mühendislik"],
+        difficulty: "Orta",
+        minLevel: "kalfa"
+    },
+    {
+        id: "workshop-3",
+        title: "🚀 Girişimcilik: Fikirden Ürüne",
+        description: "Teknoloji girişiminizi nasıl kurarsınız? İş modeli kanvası ve sunum teknikleri.",
+        icon: "lightbulb",
+        status: "open",
+        participants: 8,
+        reward: 1000,
+        daysLeft: 7,
+        tags: ["Soft Skills", "Business", "Networking"],
+        difficulty: "İleri",
+        minLevel: "usta"
+    },
+    {
+        id: "workshop-4",
+        title: "🎮 Game Jam: 48 Saat",
+        description: "Takımını kur, 48 saatte oyununu geliştir. Büyük ödül sizi bekliyor!",
+        icon: "sports_esports",
+        status: "live",
+        participants: 45,
+        reward: 2000,
+        daysLeft: 1,
+        tags: ["Oyun Geliştirme", "Unity", "Takım Çalışması"],
+        difficulty: "Herkes",
+        minLevel: "cirak"
+    },
+    {
+        id: "workshop-5",
+        title: "☁️ Bulut Bilişim Zirvesi",
+        description: "AWS ve Azure uzmanlarıyla buluşma. Sektör trendlerini yakalayın.",
+        icon: "cloud",
+        status: "open",
+        participants: 80,
+        reward: 150,
+        daysLeft: 10,
+        tags: ["Cloud", "DevOps", "Kariyer"],
+        difficulty: "Herkes",
+        minLevel: "cirak"
+    }
 ];
 
 const fadeInUp = {

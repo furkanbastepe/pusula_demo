@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "prototip"
+    "prototip",
+    "pusula_demo"
   ]
 }

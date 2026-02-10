@@ -49,7 +49,7 @@ export default function SimulasyonPage() {
                 <Card className="border-border bg-card/80 backdrop-blur">
                     <CardContent className="p-4 text-center">
                         <div className="text-2xl font-bold text-primary">
-                            {state.simulation.status === "completed" ? 1 : 0}/{SIMULATIONS.length}
+                            {state.simulation?.status === "completed" ? 1 : 0}/{SIMULATIONS.length}
                         </div>
                         <div className="text-xs text-muted-foreground">Tamamlanan</div>
                     </CardContent>
@@ -82,8 +82,8 @@ export default function SimulasyonPage() {
                     const isUnlocked = sim.id === "climate-crisis" || sim.id === "water-management"; // Allow first two for view
                     // Real logic: const isUnlocked = state.level !== "cirak" || sim.id === "climate-crisis";
 
-                    const isActive = state.simulation.activeScenarioId === sim.id && state.simulation.status === "running";
-                    const isCompleted = state.simulation.activeScenarioId === sim.id && state.simulation.status === "completed";
+                    const isActive = state.simulation?.activeScenarioId === sim.id && state.simulation?.status === "running";
+                    const isCompleted = state.simulation?.activeScenarioId === sim.id && state.simulation?.status === "completed";
 
                     // Force unlock for demo purposes if we want to show UI
 

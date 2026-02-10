@@ -88,6 +88,45 @@ export default function KapiPage() {
                     </p>
                 </CardContent>
             </Card>
-        </div>
+
+
+            <div className="mt-8 w-full max-w-sm">
+                <CapacityIndicator />
+            </div>
+        </div >
+    );
+}
+
+function CapacityIndicator() {
+    const { state } = useDemo();
+    // Helper to get capacity (we could import the selector but for now inline or import)
+    // Importing selector is better. 
+    // But let's just use state data directly if selector import is annoying to add (it is separate file).
+    // Actually I should import it.
+
+    // Occupancy 24/30 mock
+    const occupancy = state.center.occupancy;
+    const capacity = state.center.capacity;
+    const percent = Math.round((occupancy / capacity) * 100);
+
+    return (
+        <Card className="bg-black/40 border-white/10 backdrop-blur text-white">
+            <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                    <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Merkez Doluluk</p>
+                    <p className="text-2xl font-bold font-display">{occupancy} / {capacity}</p>
+                </div>
+                <div className="text-right">
+                    <Badge variant={percent > 90 ? "destructive" : percent > 60 ? "default" : "secondary"} className="mb-1">
+                        %{percent} Dolu
+                    </Badge>
+                    <p className="text-xs text-slate-400">{capacity - occupancy} boş yer</p>
+                </div>
+            </CardContent>
+            {/* Progress bar */}
+            <div className="h-1 w-full bg-white/10">
+                <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${percent}%` }}></div>
+            </div>
+        </Card>
     );
 }

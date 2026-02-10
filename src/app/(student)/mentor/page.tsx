@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { MaterialIcon } from "@/components/common/MaterialIcon";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 
+import { matchMentorIntent, getFallbackResponse } from "@/lib/content/mentor-responses";
+
 interface Message {
     id: string;
     role: "user" | "assistant";
@@ -24,9 +26,13 @@ interface SuggestionChip {
 
 const suggestionChips: SuggestionChip[] = [
     { text: "SDG nedir?", icon: "public" },
-    { text: "Nasıl kanıt oluştururum?", icon: "attach_file" },
     { text: "XP nasıl kazanırım?", icon: "star" },
     { text: "GDR puanı ne demek?", icon: "insights" },
+    { text: "Nasıl kanıt oluştururum?", icon: "attach_file" },
+    { text: "Kariyer yolumu nasıl seçerim?", icon: "route" },
+    { text: "Simülasyon nedir?", icon: "sports_esports" },
+    { text: "MicroLab nasıl çalışır?", icon: "science" },
+    { text: "Mezuniyet koşulları neler?", icon: "school" },
 ];
 
 const quickActions = [
@@ -103,16 +109,10 @@ export default function MentorPage() {
         setInput("");
         setIsTyping(true);
 
-        // Simulate AI response
+        // Intent-based matching with 3-tier fallback
         setTimeout(() => {
-            const responses: Record<string, string> = {
-                "SDG nedir?": "SDG, Sürdürülebilir Kalkınma Amaçları (Sustainable Development Goals) anlamına gelir. Birleşmiş Milletler tarafından 2015'te belirlenen 17 küresel hedeftir. PUSULA'da SDG'lere bağlı projeler yaparak hem dünyaya katkı sağlıyorsun hem de öğreniyorsun! 🌍",
-                "Nasıl kanıt oluştururum?": "Kanıt oluşturmak için:\n\n1. **Ekran görüntüsü**: İşini gösteren bir görüntü al\n2. **Video**: Süreç kaydı yap\n3. **Dosya**: Oluşturduğun dökümanı yükle\n4. **Link**: Canlı projenin linkini paylaş\n\nÖnemli: Kanıt tarih ve bağlam içermeli! 📸",
-                "XP nasıl kazanırım?": "XP kazanmanın yolları:\n\n⭐ **Görev Tamamla**: Her görev XP verir\n📚 **MicroLab Bitir**: Eğitimleri tamamla\n🔥 **Streak Tut**: Ardışık günler aktif ol\n🏆 **Rozetler Kazan**: Özel başarılar\n\nToplam XP'n seviye atlaman için kritik!",
-                "GDR puanı ne demek?": "GDR = Girişimcilik Dinamik Raporu\n\n📊 Üç boyutta ölçülür:\n- **G (Girişkenlik)**: İnisiyatif alma\n- **D (Dayanıklılık)**: Zorlukları aşma\n- **R (Refleksiyon)**: Öğrenmeyi yansıtma\n\n100 üzerinden skorlanır, senin benzersiz profilini oluşturur!",
-            };
-
-            const response = responses[messageText] || `"${messageText}" hakkında düşünüyorum... Bu konuda sana yardımcı olmak isterim! Daha spesifik bir soru sorabilir misin?`;
+            const intent = matchMentorIntent(messageText);
+            const response = intent ? intent.response : getFallbackResponse();
 
             const aiMessage: Message = {
                 id: `ai-${Date.now()}`,
@@ -122,7 +122,7 @@ export default function MentorPage() {
             };
             setMessages((prev) => [...prev, aiMessage]);
             setIsTyping(false);
-        }, 1500);
+        }, 1200 + Math.random() * 800);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -1,157 +1,188 @@
-import { LearnerState } from "./types";
-import { MICROLABS } from "../content/microlabs";
-import { TASKS } from "../content/tasks";
-import { EVENTS } from "../content/events";
+import { DemoState } from "./types";
+import { CAREER_PATHS } from "@/lib/content/path-packs";
+import { MICROLABS } from "@/lib/content/microlabs";
+import { TASKS } from "@/lib/content/tasks";
 
-export interface DashboardData {
-    nextBestAction: {
-        id: string;
-        title: string;
-        description: string;
-        type: "microlab" | "task" | "event";
-        xp: number;
-        actionUrl: string;
-        thumbnail?: string;
-    };
-    currentModule: {
-        title: string;
-        progress: number;
-        currentLesson: string;
-        lessons: { id: string; title: string; done: boolean; current: boolean }[];
-    } | null;
-    activeTasks: {
-        id: string;
-        title: string;
-        difficulty: "Kolay" | "Orta" | "Zor"; // Aligning with UI expectation (was 'easy' | 'med' | 'hard' in some places, unifying to Turkish/English mapping in component if needed or strict type)
-        xp: number;
-        deadline: string;
-        progress: number;
-    }[];
-    upcomingEvents: {
-        id: string;
-        title: string;
-        date: string;
-        type: "meeting" | "event" | "workshop";
-    }[];
-    feedItems: {
-        id: string;
-        type: "achievement" | "problem" | "workshop" | "milestone" | "announcement";
-        title: string;
-        description?: string;
-        link?: string;
-        timestamp: string;
-        xp?: number;
-    }[];
-}
+// ─── Next Best Action ────────────────────────────────────────
+// Deterministic recommendation based on phase + career path
 
-export function getDashboardData(state: LearnerState): DashboardData {
-    // 1. Determine Next Best Action
-    // Logic: First incomplete MicroLab -> First incomplete Task -> Next Event
-    let nextBestAction: DashboardData["nextBestAction"] = {
-        id: "default",
-        title: "Yolculuğun Tamamlandı",
-        description: "Tebrikler! Tüm görevleri bitirdin.",
-        type: "event",
-        xp: 0,
-        actionUrl: "/mezuniyet"
-    };
+export const getRecommendedNextStep = (state: DemoState) => {
+    const pathId = state.onboarding?.primaryPath || "veri-analizi";
+    const pathPack = CAREER_PATHS.find(p => p.id === pathId);
 
-    const nextMicrolab = MICROLABS.find(m => !state.completedMicrolabs.includes(m.id));
-    if (nextMicrolab) {
-        nextBestAction = {
-            id: nextMicrolab.id,
-            title: nextMicrolab.title,
-            description: nextMicrolab.description,
-            type: "microlab",
-            xp: nextMicrolab.xp,
-            actionUrl: `/microlab/${nextMicrolab.id}`,
-            thumbnail: nextMicrolab.thumbnail
+    if (state.phase === "onboarding") {
+        return {
+            type: "onboarding" as const,
+            title: "Profilini Tamamla",
+            description: "Yolculuğuna başlamak için hedefini seç.",
+            actionUrl: "/baslangic",
+            priority: "critical" as const,
         };
-    } else {
-        const nextTask = TASKS.find(t => !state.completedTasks.includes(t.id));
-        if (nextTask) {
-            nextBestAction = {
-                id: nextTask.id,
-                title: nextTask.title,
-                description: nextTask.description,
-                type: "task",
-                xp: nextTask.xp,
-                actionUrl: `/gorev/${nextTask.id}`
+    }
+
+    if (state.phase === "discovery") {
+        if (state.xp < 200) {
+            // Suggest the first microlab for their career path
+            const relevantLab = MICROLABS.find(m => m.careerPath === pathId) || MICROLABS[0];
+            return {
+                type: "microlab" as const,
+                title: relevantLab.title,
+                description: relevantLab.description,
+                actionUrl: `/microlab/${relevantLab.id}`,
+                priority: "high" as const,
             };
         }
-    }
-
-    // 2. Derive Current Module (Mocking structure for now based on next microlab)
-    let currentModule = null;
-    if (nextMicrolab) {
-        currentModule = {
-            title: "Dijital Okuryazarlık ve Algoritma", // Generic Module Name
-            progress: Math.floor((state.completedMicrolabs.length / MICROLABS.length) * 100),
-            currentLesson: nextMicrolab.title,
-            lessons: MICROLABS.slice(0, 3).map(m => ({
-                id: m.id,
-                title: m.title.substring(0, 20) + "...",
-                done: state.completedMicrolabs.includes(m.id),
-                current: m.id === nextMicrolab.id
-            }))
+        // Suggest first task for their career path
+        const relevantTask = TASKS.find(t => t.careerPath === pathId) || TASKS[0];
+        return {
+            type: "task" as const,
+            title: relevantTask.title,
+            description: relevantTask.description,
+            actionUrl: `/gorev/${relevantTask.id}`,
+            priority: "medium" as const,
         };
     }
 
-    // 3. Active Tasks
-    // For demo, show the next 2 available tasks
-    const activeTasks = TASKS
-        .filter(t => !state.completedTasks.includes(t.id))
-        .slice(0, 2)
-        .map(t => ({
-            id: t.id,
-            title: t.title,
-            difficulty: t.difficulty,
-            xp: t.xp,
-            deadline: t.deadline,
-            progress: 0 // Mock progress
-        }));
+    if (state.phase === "build") {
+        return {
+            type: "simulation" as const,
+            title: "Simülasyona Git",
+            description: pathPack
+                ? `${pathPack.title} yolundaki simülasyonunu tamamla.`
+                : "Gerçek hayat senaryosunu kodla çöz.",
+            actionUrl: "/simulasyon",
+            priority: "critical" as const,
+        };
+    }
 
-    // 4. Upcoming Events
-    const upcomingEvents = EVENTS.map(e => ({
-        id: e.id,
-        title: e.title,
-        date: e.date,
-        type: e.type
-    }));
-
-    // 5. Mock Feed (Static for now, could be randomized)
-    const feedItems: DashboardData["feedItems"] = [
-        {
-            id: "1",
-            type: "achievement",
-            title: "Yeni Rozet: İlk Adım",
-            description: "İlk MicroLab'ını tamamladın!",
-            timestamp: "Bugün",
-            xp: 50,
-        },
-        {
-            id: "2",
-            type: "problem",
-            title: "Yeni Problem: Su Tasarrufu",
-            description: "SDG 6 - Temiz Su ve Sanitasyon",
-            link: "/pazar",
-            timestamp: "2 saat önce",
-        },
-        {
-            id: "3",
-            type: "workshop",
-            title: "Atölye: Kod İnceleme",
-            description: "Yarın 14:00'te başlıyor",
-            link: "/pazar?tab=workshops",
-            timestamp: "Yarın",
-        },
-    ];
+    if (state.phase === "impact") {
+        return {
+            type: "mentoring" as const,
+            title: "Mentor Görüşmesi",
+            description: "Final projen için geri bildirim al.",
+            actionUrl: "/mentor",
+            priority: "high" as const,
+        };
+    }
 
     return {
-        nextBestAction,
-        currentModule,
-        activeTasks,
-        upcomingEvents,
-        feedItems
+        type: "graduation" as const,
+        title: "Mezuniyet Töreni",
+        description: "Sertifikanı al ve kutla! 🎓",
+        actionUrl: "/mezuniyet",
+        priority: "celebrate" as const,
     };
-}
+};
+
+// ─── Center Capacity ─────────────────────────────────────────
+
+export const getCenterCapacityCard = (state: DemoState) => {
+    const occupancy = state.center.occupancy;
+    const capacity = state.center.capacity;
+    const ratio = occupancy / capacity;
+
+    let status: "low" | "moderate" | "high" | "full" = "low";
+    if (ratio >= 1) status = "full";
+    else if (ratio > 0.8) status = "high";
+    else if (ratio > 0.5) status = "moderate";
+
+    return {
+        occupancy,
+        capacity,
+        ratio,
+        status,
+        message:
+            status === "full"
+                ? "Merkez şu an tam kapasite. Yer açılmasını bekle."
+                : `Merkezde ${capacity - occupancy} kişilik yer var.`,
+    };
+};
+
+// ─── Graduation Checklist ────────────────────────────────────
+
+export const getGraduationChecklist = (state: DemoState) => {
+    return [
+        { id: "xp", label: "5000 XP Topla", isComplete: state.xp >= 5000 },
+        {
+            id: "level",
+            label: "Usta Seviyesine Ulaş",
+            isComplete: state.level === "usta" || state.level === "graduate",
+        },
+        {
+            id: "sim",
+            label: "Capstone Projesini Tamamla",
+            isComplete: state.simulation?.status === "completed",
+        },
+        { id: "gdr", label: "GDR Skoru > 80", isComplete: state.gdrScore > 80 },
+        {
+            id: "workshop",
+            label: "En az 3 Atölyeye Katıl",
+            isComplete: state.workshops.attendedIds.length >= 3,
+        },
+    ];
+};
+
+// ─── Dashboard Composite Selector ────────────────────────────
+
+export const getDashboardData = (state: DemoState) => {
+    const recommendation = getRecommendedNextStep(state);
+    const pathId = state.onboarding?.primaryPath || "veri-analizi";
+    const pathPack = CAREER_PATHS.find(p => p.id === pathId);
+
+    // Get career-path-specific tasks
+    const pathTasks = TASKS.filter(t => t.careerPath === pathId).slice(0, 2);
+    const activeTasks = pathTasks.map((t, i) => ({
+        id: t.id,
+        title: t.title,
+        status: i === 0 ? ("pending" as const) : ("todo" as const),
+        deadline: i === 0 ? "Bugün" : "Yarın",
+        difficulty: t.difficulty,
+        xp: t.xp,
+        progress: 0,
+    }));
+
+    return {
+        nextBestAction: {
+            ...recommendation,
+            xp: 50,
+            thumbnail:
+                recommendation.type === "microlab"
+                    ? "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop"
+                    : "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&fit=crop",
+        },
+        currentModule: {
+            title: pathPack ? `${pathPack.title} — Temel Modül` : "Dijital Okuryazarlık",
+            progress: 35,
+            totalSteps: 12,
+            completedSteps: 4,
+        },
+        activeTasks:
+            activeTasks.length > 0
+                ? activeTasks
+                : [
+                    {
+                        id: "1",
+                        title: "İlk Görevini Seç",
+                        status: "todo" as const,
+                        deadline: "Bugün",
+                        difficulty: "Kolay" as const,
+                        xp: 150,
+                        progress: 0,
+                    },
+                ],
+        upcomingEvents: [
+            { id: "evt1", title: "Mentör Buluşması", date: "Cuma 14:00", type: "meeting" },
+        ],
+        feedItems: state.dashboard.notifications.map(n => ({
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            timestamp: n.timestamp.toISOString(),
+            type: (n.type === "success"
+                ? "achievement"
+                : n.type === "error"
+                    ? "problem"
+                    : "announcement") as any,
+        })),
+    };
+};

@@ -50,8 +50,8 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
     };
 
     const mainNav = MAIN_NAV_TEMPLATE.map(item => {
-        if (item.label === "Bildirimler" && (currentUser?.notifications?.length || 0) > 0) {
-            return { ...item, badge: currentUser.notifications.length };
+        if (item.label === "Bildirimler" && (currentUser?.dashboard?.notifications?.length || 0) > 0) {
+            return { ...item, badge: currentUser.dashboard.notifications.length };
         }
         return item;
     });
@@ -140,9 +140,9 @@ export function SidebarMobileSheet({ type = "student" }: SidebarMobileSheetProps
                     <Link href="/bildirimler">
                         <Button variant="ghost" size="icon" className="relative text-muted-foreground">
                             <MaterialIcon name="notifications" />
-                            {(currentUser?.notifications?.length || 0) > 0 && (
+                            {(currentUser?.dashboard?.notifications?.length || 0) > 0 && (
                                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
-                                    {currentUser.notifications.length}
+                                    {currentUser.dashboard.notifications.length}
                                 </span>
                             )}
                         </Button>

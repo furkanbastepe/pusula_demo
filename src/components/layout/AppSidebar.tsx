@@ -53,8 +53,8 @@ export function AppSidebar({ className }: AppSidebarProps) {
     };
 
     const secondaryNav = SECONDARY_NAV_TEMPLATE.map(item => {
-        if (item.label === "Bildirimler" && (currentUser?.notifications?.length || 0) > 0) {
-            return { ...item, badge: currentUser.notifications.length };
+        if (item.label === "Bildirimler" && (currentUser?.dashboard?.notifications?.length || 0) > 0) {
+            return { ...item, badge: currentUser.dashboard.notifications.length };
         }
         return item;
     });

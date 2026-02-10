@@ -30,12 +30,16 @@ const user = {
     gdrScore: 58,
     joinedAt: "Ocak 2025",
     bio: "İklim aktivisti ve veri analisti. Sürdürülebilir geleceği inşa etmek için buradayım.",
-    skills: ["Data Viz", "Sunum", "Python", "Figma"],
+    skills: ["Veri Analizi", "Excel", "Sunum", "Python", "Figma", "SQL"],
     badges: [
         { id: "b1", name: "İlk Görev", icon: "task_alt", color: "text-green-400" },
         { id: "b2", name: "7 Gün Streak", icon: "local_fire_department", color: "text-orange-400" },
         { id: "b3", name: "Takım Oyuncusu", icon: "people", color: "text-blue-400" },
         { id: "b4", name: "Araştırmacı", icon: "search", color: "text-purple-400" },
+        { id: "b5", name: "MicroLab Ustası", icon: "science", color: "text-cyan-400" },
+        { id: "b6", name: "Kod Kahramanı", icon: "code", color: "text-pink-400" },
+        { id: "b7", name: "Simülasyon Pilotu", icon: "sports_esports", color: "text-yellow-400" },
+        { id: "b8", name: "SDG Savunucusu", icon: "public", color: "text-emerald-400" },
     ],
 };
 
@@ -226,7 +230,7 @@ export default function ProfilPage() {
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-lg">
                                     <MaterialIcon name="emoji_events" className="text-chart-4" />
-                                    Rozetler
+                                    Rozetler ({user.badges.length})
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -239,6 +243,50 @@ export default function ProfilPage() {
                                             <span className="text-sm font-medium text-foreground">{badge.name}</span>
                                         </div>
                                     ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Streak Calendar */}
+                        <Card className="border-border bg-card/80 backdrop-blur md:col-span-2">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="flex items-center gap-2 text-lg">
+                                    <MaterialIcon name="local_fire_department" className="text-orange-400" />
+                                    Streak Takvimi
+                                    <Badge className="ml-auto bg-orange-500/20 text-orange-400 border-0">
+                                        {profileUser.streak} gün 🔥
+                                    </Badge>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-7 gap-1.5">
+                                    {Array.from({ length: 28 }).map((_, i) => {
+                                        // Simulate activity: last `streak` days are active
+                                        const isActive = i >= (28 - profileUser.streak);
+                                        const isToday = i === 27;
+                                        return (
+                                            <div
+                                                key={i}
+                                                className={`h-8 rounded-md border transition-colors ${isToday
+                                                        ? "border-primary bg-primary/30 ring-2 ring-primary/40"
+                                                        : isActive
+                                                            ? "border-orange-500/30 bg-orange-500/20"
+                                                            : "border-border/50 bg-secondary/20"
+                                                    }`}
+                                                title={isToday ? "Bugün" : isActive ? "Aktif gün" : "Boş gün"}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                                    <span>4 hafta önce</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-3 w-3 rounded-sm bg-secondary/20 border border-border/50" />
+                                        <span>Boş</span>
+                                        <div className="h-3 w-3 rounded-sm bg-orange-500/20 border border-orange-500/30" />
+                                        <span>Aktif</span>
+                                    </div>
+                                    <span>Bugün</span>
                                 </div>
                             </CardContent>
                         </Card>

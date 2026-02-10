@@ -188,6 +188,32 @@ export default function RehberPage() {
 
                 {/* Right Column */}
                 <div className="space-y-6">
+                    {/* Quick Actions */}
+                    <Card className="border-border bg-card/80 backdrop-blur">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base">Hızlı İşlemler</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            <Link href="/rehber/kohort" className="block">
+                                <Button variant="outline" className="w-full justify-start border-border hover:border-blue-500/50 hover:bg-blue-500/5">
+                                    <MaterialIcon name="groups" className="mr-2 text-blue-400" size="sm" />
+                                    Kohort Yönetimi
+                                </Button>
+                            </Link>
+                            <Link href="/rehber/degerlendirme" className="block">
+                                <Button variant="outline" className="w-full justify-start border-border hover:border-amber-500/50 hover:bg-amber-500/5">
+                                    <MaterialIcon name="grading" className="mr-2 text-amber-400" size="sm" />
+                                    Değerlendirme
+                                </Button>
+                            </Link>
+                            <Button variant="outline" className="w-full justify-start border-border hover:border-emerald-500/50 hover:bg-emerald-500/5"
+                                onClick={() => toast.success("Haftalık rapor oluşturuldu.")}>
+                                <MaterialIcon name="summarize" className="mr-2 text-emerald-400" size="sm" />
+                                Haftalık Rapor Oluştur
+                            </Button>
+                        </CardContent>
+                    </Card>
+
                     {/* Event Management Mock */}
                     <Card className="border-border bg-card/80 backdrop-blur">
                         <CardHeader>
@@ -230,11 +256,18 @@ export default function RehberPage() {
                                 AI Asistanı
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-3">
                             <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-sm text-purple-200">
-                                <p className="mb-2"><strong>Dikkat:</strong> 3 öğrenci "Python Değişkenler" konusunda takıldı. Ek kaynak paylaşmamı ister misin?</p>
+                                <p className="mb-2"><strong>Dikkat:</strong> 3 öğrenci &quot;Python Değişkenler&quot; konusunda takıldı. Ek kaynak paylaşmamı ister misin?</p>
                                 <Button size="sm" variant="secondary" className="w-full h-8 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border-0">
                                     Kaynakları Gönder
+                                </Button>
+                            </div>
+                            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-200">
+                                <p className="mb-2"><strong>Risk:</strong> Can Öztürk 5 gündür giriş yapmadı. İletişime geçmeni öneririm.</p>
+                                <Button size="sm" variant="secondary" className="w-full h-8 text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-0"
+                                    onClick={() => toast.info("Mock: Can Öztürk'e hatırlatma mesajı gönderildi.")}>
+                                    Hatırlatma Gönder
                                 </Button>
                             </div>
                         </CardContent>

@@ -10,13 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import { MaterialIcon } from "@/components/common/MaterialIcon";
 import { useDemo } from "@/lib/DemoContext";
 import confetti from "canvas-confetti";
+import { getGraduationChecklist } from "@/lib/demo/selectors";
+import { cn } from "@/lib/utils";
 
 export default function MezuniyetPage() {
     const { state } = useDemo();
     const router = useRouter();
     const [showCertificate, setShowCertificate] = useState(false);
 
-    const isGraduated = state.phase === "graduation" || state.xp > 3000; // Mock condition
+    const checklist = getGraduationChecklist(state);
+    const isGraduated = checklist.every(i => i.isComplete);
 
     useEffect(() => {
         if (isGraduated) {
@@ -53,23 +56,34 @@ export default function MezuniyetPage() {
                     </div>
                     <h1 className="text-3xl font-bold font-display">Henüz Mezun Değilsin</h1>
                     <p className="text-muted-foreground">
-                        Eğitim yolculuğun devam ediyor. Tüm görevleri tamamla ve gereken XP'ye ulaş!
+                        Mezuniyet için aşağıdaki kriterleri tamamlaman gerekiyor:
                     </p>
-                    <div className="p-4 bg-secondary/30 rounded-lg border border-border">
-                        <div className="flex justify-between text-sm mb-2">
-                            <span>İlerleme</span>
-                            <span>{Math.min(100, Math.round((state.xp / 3000) * 100))}%</span>
-                        </div>
-                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-primary transition-all duration-1000"
-                                style={{ width: `${Math.min(100, (state.xp / 3000) * 100)}%` }}
-                            />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2 text-left">Hedef: 3000 XP</p>
+
+                    <div className="bg-card/50 border border-white/5 rounded-xl p-6 text-left space-y-4">
+                        {checklist.map((item) => (
+                            <div key={item.id} className="flex items-center gap-4">
+                                <div className={cn(
+                                    "flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
+                                    item.isComplete
+                                        ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
+                                        : "bg-secondary border-white/10 text-muted-foreground"
+                                )}>
+                                    <MaterialIcon name={item.isComplete ? "check" : "circle"} size="sm" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className={cn(
+                                        "font-medium",
+                                        item.isComplete ? "text-foreground" : "text-muted-foreground"
+                                    )}>{item.label}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    <Link href="/ogren">
-                        <Button className="w-full mt-4">Öğrenmeye Devam Et</Button>
+
+                    <Link href="/panel">
+                        <Button className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
+                            Panele Dön & Tamamla
+                        </Button>
                     </Link>
                 </motion.div>
             </div>

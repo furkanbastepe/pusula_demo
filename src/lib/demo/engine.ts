@@ -1,74 +1,180 @@
-import { LearnerState, DemoScenario, DemoAction, JourneyPhase } from "./types";
-import { SeededRNG } from "./seeded-rng";
+import { DemoState, DemoAction, JourneyPhase, OnboardingState } from "./types";
 
 export class DemoEngine {
-    private state: LearnerState;
-    private rng: SeededRNG;
-    private scenario: DemoScenario;
-    private listeners: ((state: LearnerState) => void)[] = [];
+    private state: DemoState;
+    private listeners: ((state: DemoState) => void)[] = [];
 
-    constructor(scenario: DemoScenario, seed: string = "DEMO_2026") {
-        this.scenario = scenario;
-        this.rng = new SeededRNG(seed);
-        this.state = this.initializeState(scenario, seed);
+    constructor(initialState: DemoState) {
+        this.state = initialState;
     }
 
-    private initializeState(scenario: DemoScenario, seed: string): LearnerState {
-        const baseState: LearnerState = {
-            seed,
-            name: "Öğrenci",
-            role: "student",
-            cohort: "Genel",
-            avatarUrl: "/avatars/default.png",
-            sdg: 0,
-            phase: "onboarding",
-            level: "cirak",
-            xp: 0,
-            streak: 0,
-            gdrScore: 0,
-            gdrComponents: { teknik_rol: 0, takim: 0, sunum: 0, guvenilirlik: 0, sosyal_etki: 0 },
-            completedMicrolabs: [],
-            completedTasks: [],
-            collectedBadges: [],
-            simulation: {
-                activeScenarioId: null,
-                status: "idle",
-                score: 0,
-            },
-            inventory: [],
-            notifications: [],
-        };
-
-        return { ...baseState, ...scenario.initialState };
-    }
-
-    public getState(): LearnerState {
+    public getState(): DemoState {
         return { ...this.state };
     }
 
     public dispatch(action: DemoAction) {
-        const previousState = { ...this.state };
+        // console.log("Dispatching:", action.type, action); 
 
         switch (action.type) {
-            case "COMPLETE_MICROLAB":
-                if (!this.state.completedMicrolabs.includes(action.payload.id)) {
-                    this.state.completedMicrolabs.push(action.payload.id);
-                    this.state.xp += action.payload.xp;
+            // General State Updates
+            case "SET_STAGE":
+                // Handled via JUMP_TO_CHECKPOINT logic mostly, but kept for compatibility if needed
+                break;
+
+            case "UPDATE_USER":
+                this.state = {
+                    ...this.state,
+                    ...action.payload,
+                };
+                break;
+
+            case "ADD_NOTIFICATION":
+                this.addNotification({
+                    title: action.payload.title,
+                    message: action.payload.message,
+                    type: action.payload.type,
+                });
+                break;
+
+            case "MARK_NOTIFICATION_READ":
+                this.state.dashboard.notifications = this.state.dashboard.notifications.map((n) =>
+                    n.id === action.payload.id ? { ...n, read: true } : n
+                );
+                break;
+
+            case "ADD_XP":
+                this.state.xp += action.payload.amount;
+                this.checkLevelUp();
+                break;
+
+            // Phase & Simulation
+            case "ADVANCE_PHASE":
+                this.state.phase = action.payload.phase;
+                this.addNotification({
+                    title: "Yeni Faz Kilidi Açıldı",
+                    message: `${this.getPhaseName(action.payload.phase)} fazına hoşgeldin!`,
+                    type: "success",
+                });
+                break;
+
+            case "START_SIMULATION":
+                if (this.state.simulation) {
+                    this.state.simulation.activeScenarioId = action.payload.id;
+                    this.state.simulation.status = "running";
+                    this.state.simulation.score = 0;
+                }
+                break;
+
+            case "COMPLETE_SIMULATION":
+                this.state.xp += action.payload.xp;
+                this.state.gdrScore += 5; // Deterministic boost
+                if (this.state.simulation) {
+                    this.state.simulation.status = "completed";
+                    this.state.simulation.score = action.payload.score;
+                }
+                this.addNotification({
+                    title: "Simülasyon Tamamlandı",
+                    message: `Sürdürülebilirlik hedefine ulaştın! +${action.payload.xp} XP`,
+                    type: "success",
+                });
+                this.checkLevelUp();
+                break;
+
+            // V2 Deterministic Actions
+            case "COMPLETE_ONBOARDING":
+                this.state.onboarding = action.payload;
+                this.state.phase = "discovery";
+                // Set primary path as active (mock logic)
+                this.addNotification({
+                    title: "Yolculuk Başladı",
+                    message: "Profilin oluşturuldu. İlk hedefini seç!",
+                    type: "success",
+                });
+                break;
+
+            case "CHECKIN_CENTER":
+                this.state.center.occupancy += 1;
+                this.state.center.activeCheckInId = "checkin-" + Date.now();
+                this.addNotification({
+                    title: "Hoşgeldin!",
+                    message: `${action.payload.purpose === 'learning' ? 'Öğrenme' : 'Etkinlik'} için giriş yapıldı.`,
+                    type: "success",
+                });
+                break;
+
+            case "CHECKOUT_CENTER":
+                if (this.state.center.occupancy > 0) this.state.center.occupancy -= 1;
+                this.state.center.activeCheckInId = undefined;
+                this.state.xp += 50; // Check-out bonus
+                this.addNotification({
+                    title: "Güle Güle!",
+                    message: "Merkezden çıkış yapıldı. +50 XP",
+                    type: "info",
+                });
+                break;
+
+            case "REGISTER_WORKSHOP":
+                if (!this.state.workshops.registeredIds.includes(action.payload.workshopId)) {
+                    this.state.workshops.registeredIds.push(action.payload.workshopId);
                     this.addNotification({
-                        title: "MicroLab Tamamlandı",
-                        message: `Tebrikler! ${action.payload.xp} XP kazandın.`,
+                        title: "Atölye Kaydı Alındı",
+                        message: "Kontenjan ayrıldı. Takvimine eklendi.",
                         type: "success",
                     });
                 }
                 break;
 
-            case "SUBMIT_TASK":
-                if (!this.state.completedTasks.includes(action.payload.id)) {
-                    this.state.completedTasks.push(action.payload.id);
+            case "COMPLETE_DAILY_REVIEW":
+                this.state.dailyReview.completedToday += action.payload.reviewed;
+                this.state.dailyReview.streak += 1;
+                this.state.streak += 1;
+                this.state.xp += action.payload.reviewed * 10;
+                break;
+
+            case "GENERATE_CERTIFICATE":
+                this.state.portfolio.certificateId = "CERT-" + Math.random().toString(36).substring(2, 9).toUpperCase();
+                this.addNotification({
+                    title: "Sertifika Hazır",
+                    message: "Mezuniyet sertifikan oluşturuldu.",
+                    type: "success",
+                });
+                break;
+
+            // The "Magic" Presentation Controller
+            case "JUMP_TO_CHECKPOINT":
+                this.hydrateCheckpoint(action.payload.id);
+                break;
+
+            // Retained for backward compatibility
+            case "MANUAL_LEVEL_UP":
+                this.state.level = action.payload.level as any;
+                break;
+
+            case "JUMP_TO_STAGE":
+                // Legacy handler
+                break;
+
+            // Legacy Handlers
+            case "COMPLETE_MICROLAB":
+                if (!this.state.completedMicrolabs?.includes(action.payload.id)) {
+                    this.state.completedMicrolabs = [...(this.state.completedMicrolabs || []), action.payload.id];
                     this.state.xp += action.payload.xp;
                     this.addNotification({
-                        title: "Görev Teslim Edildi",
-                        message: `Harika iş! Görevin incelemeye alındı.`,
+                        title: "MicroLab Tamamlandı",
+                        message: `+${action.payload.xp} XP kazandın.`,
+                        type: "success",
+                    });
+                    this.checkLevelUp();
+                }
+                break;
+
+            case "SUBMIT_TASK":
+                if (!this.state.completedTasks?.includes(action.payload.id)) {
+                    this.state.completedTasks = [...(this.state.completedTasks || []), action.payload.id];
+                    this.state.xp += action.payload.xp;
+                    this.addNotification({
+                        title: "Görev Gönderildi",
+                        message: `Görevin inceleniyor. +${action.payload.xp} XP (tahmini)`,
                         type: "info",
                     });
                 }
@@ -78,82 +184,70 @@ export class DemoEngine {
                 this.state.xp += action.payload.xp;
                 this.addNotification({
                     title: "Etkinliğe Katıldın",
-                    message: `Fiziksel merkezde check-in yapıldı. +${action.payload.xp} XP`,
-                    type: "success"
+                    message: `+${action.payload.xp} XP kazandın.`,
+                    type: "success",
                 });
                 break;
 
-            case "ADVANCE_PHASE":
-                this.state.phase = action.payload.phase;
+            // ─── V2 Nirvana Actions ──────────────────────────────
+            case "START_MODULE":
                 this.addNotification({
-                    title: "Yeni Faz Kilidi Açıldı",
-                    message: `${this.getPhaseName(action.payload.phase)} fazına hoşgeldin!`,
-                    type: "success"
+                    title: "Modül Başladı",
+                    message: `${action.payload.moduleId} modülüne başladın.`,
+                    type: "info",
                 });
                 break;
 
-            case "START_SIMULATION":
-                this.state.simulation.activeScenarioId = action.payload.id;
-                this.state.simulation.status = "running";
-                this.state.simulation.score = 0;
-                break;
-
-            case "COMPLETE_SIMULATION":
-                if (this.state.simulation.activeScenarioId === action.payload.id) {
-                    this.state.simulation.status = "completed";
-                    this.state.simulation.score = action.payload.score;
-                    this.state.xp += action.payload.xp;
-                    this.addNotification({
-                        title: "Simülasyon Tamamlandı",
-                        message: `Sürdürülebilirlik hedefine ulaştın! +${action.payload.xp} XP`,
-                        type: "success"
-                    });
-                }
-                break;
-
-            case "MANUAL_LEVEL_UP":
-                this.state.level = action.payload.level as any;
+            case "COMPLETE_LESSON":
+                this.state.xp += action.payload.score * 2;
                 this.addNotification({
-                    title: "Seviye Atladın!",
-                    message: `${action.payload.level.toUpperCase()} seviyesine yükseldin.`,
-                    type: "success"
+                    title: "Ders Tamamlandı",
+                    message: `+${action.payload.score * 2} XP kazandın.`,
+                    type: "success",
+                });
+                this.checkLevelUp();
+                break;
+
+            case "BOOK_MENTOR":
+                this.addNotification({
+                    title: "Mentor Randevusu",
+                    message: `${action.payload.date} tarihine randevu alındı.`,
+                    type: "success",
                 });
                 break;
 
-            case "JUMP_TO_STAGE":
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const { DEMO_STAGES } = require("../demo-data");
-                const stageData = DEMO_STAGES[action.payload.stage];
-                if (stageData) {
-                    const u = stageData.user;
-                    this.state = {
-                        ...this.state,
-                        name: u.name,
-                        role: u.role,
-                        level: u.level,
-                        xp: u.xp,
-                        streak: u.streak,
-                        cohort: u.cohort,
-                        sdg: u.sdg,
-                        gdrScore: u.gdrScore,
-                        gdrComponents: u.gdrComponents,
-                        // Update phase based on level/stage if needed, or mapping
-                    };
-
-                    // Simple phase mapping
-                    if (action.payload.stage === "onboarding") this.state.phase = "onboarding";
-                    else if (action.payload.stage === "graduation") this.state.phase = "graduation";
-                    // else keep current or refine logic
-                }
+            case "MARK_ATTENDANCE":
+                this.state.streak += 1;
+                this.state.xp += 25;
+                this.addNotification({
+                    title: "Yoklama Alındı",
+                    message: "Bugünkü devam kaydın eklendi. +25 XP",
+                    type: "info",
+                });
                 break;
+
+            case "COMPLETE_CORE_MODULE":
+                this.state.xp += 200;
+                if (!this.state.completedMicrolabs?.includes(action.payload.moduleId)) {
+                    this.state.completedMicrolabs = [
+                        ...(this.state.completedMicrolabs || []),
+                        action.payload.moduleId,
+                    ];
+                }
+                this.addNotification({
+                    title: "Çekirdek Modül Tamamlandı! 🎉",
+                    message: `${action.payload.moduleId} başarıyla tamamlandı. +200 XP`,
+                    type: "success",
+                });
+                this.checkLevelUp();
+                break;
+
         }
 
-        this.checkLevelUp(previousState.xp);
         this.notifyListeners();
     }
 
-    private checkLevelUp(previousXp: number) {
-        // Simple XP Thresholds
+    private checkLevelUp() {
         const THRESHOLDS = {
             kalfa: 1000,
             usta: 2500,
@@ -166,21 +260,24 @@ export class DemoEngine {
             this.addNotification({ title: "MEZUN OLDUN! 🎓", message: "Yolculuğun zirvesine ulaştın.", type: "success" });
         } else if (this.state.xp >= THRESHOLDS.usta && this.state.level !== "usta" && this.state.level !== "graduate") {
             this.state.level = "usta";
+            this.state.phase = "impact";
             this.addNotification({ title: "USTA Seviyesine Yükseldin", message: "Artık liderlik edebilirsin.", type: "success" });
         } else if (this.state.xp >= THRESHOLDS.kalfa && this.state.level !== "kalfa" && this.state.level !== "usta" && this.state.level !== "graduate") {
             this.state.level = "kalfa";
+            this.state.phase = "build";
             this.addNotification({ title: "KALFA Seviyesine Yükseldin", message: "İnşa fazı başladı.", type: "success" });
         }
     }
 
-    private addNotification(n: Omit<import("./types").Notification, "id" | "read" | "timestamp">) {
-        const id = Math.random().toString(36).substring(7); // Simple ID
-        this.state.notifications.unshift({
+    private addNotification(n: { title: string; message: string; type: "info" | "success" | "warning" | "error" }) {
+        const id = Math.random().toString(36).substring(7);
+        const notification: import("./types").Notification = {
             id,
             ...n,
             read: false,
-            timestamp: new Date().toISOString(),
-        });
+            timestamp: new Date(),
+        };
+        this.state.dashboard.notifications = [notification, ...this.state.dashboard.notifications];
     }
 
     private getPhaseName(phase: JourneyPhase): string {
@@ -189,12 +286,68 @@ export class DemoEngine {
             discovery: "Keşif",
             build: "İnşa",
             impact: "Etki",
-            graduation: "Mezuniyet"
+            graduation: "Mezuniyet",
         };
-        return names[phase];
+        return names[phase] || phase;
     }
 
-    public subscribe(listener: (state: LearnerState) => void) {
+    // Deterministic State Hydration for Presentation
+    private hydrateCheckpoint(sceneIndex: number) {
+        // Reset base stats for specific scenes to ensure consistency
+        switch (sceneIndex) {
+            case 1: // Onboarding
+                this.state.phase = "onboarding";
+                this.state.level = "cirak";
+                this.state.xp = 0;
+                this.state.onboarding = { ...this.state.onboarding, primaryPath: null };
+                break;
+            case 2: // Dashboard (Discovery)
+                this.state.phase = "discovery";
+                this.state.level = "cirak";
+                this.state.xp = 150;
+                this.state.onboarding.primaryPath = "veri-analizi"; // Default for demo
+                break;
+            case 3: // Learning (MicroLab)
+                this.state.phase = "discovery";
+                this.state.level = "cirak";
+                this.state.xp = 350;
+                break;
+            case 4: // Simulation (Build)
+                this.state.phase = "build";
+                this.state.level = "kalfa";
+                this.state.xp = 1200;
+                this.state.simulation = {
+                    activeScenarioId: "traffic-ai",
+                    status: "running",
+                    score: 0
+                };
+                break;
+            case 5: // Physical Center
+                this.state.center.occupancy = 24; // Looks busy
+                break;
+            case 6: // Mentorship (Impact)
+                this.state.phase = "impact";
+                this.state.level = "usta";
+                this.state.xp = 3800;
+                this.state.gdrScore = 85;
+                break;
+            case 7: // Graduation
+                this.state.phase = "graduation";
+                this.state.level = "graduate";
+                this.state.xp = 5500;
+                this.state.gdrScore = 96;
+                this.state.portfolio.certificateId = "CERT-DEMO-2026";
+                break;
+        }
+
+        this.addNotification({
+            title: `Sahne ${sceneIndex} Yüklendi`,
+            message: "Demo durumu güncellendi.",
+            type: "info"
+        });
+    }
+
+    public subscribe(listener: (state: DemoState) => void) {
         this.listeners.push(listener);
         return () => {
             this.listeners = this.listeners.filter((l) => l !== listener);
